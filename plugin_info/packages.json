@@ -8,13 +8,13 @@
     "requests" : {"reinstall" : true}
   },
   "npm": {
-    "plugins/template/ressources/demond"  : {}
+    "plugins/jeewatchdog/ressources/demond"  : {}
   },
   "composer": {
-       "plugins/template"  : {}
+       "plugins/jeewatchdog"  : {}
   },
   "yarn": {
-    "plugins/template/ressources/demond"  : {}
+    "plugins/jeewatchdog/ressources/demond"  : {}
   },
   "plugin": {
   },
