@@ -195,7 +195,7 @@ class jeewatchdog extends eqLogic {
 		}
 	}
 
-	private function postToDevice($data) {
+	public function postToDevice($data) {
 		$deviceIP = $this->getConfiguration('deviceIP');
 		$password = $this->getConfiguration('password');
 	
@@ -282,7 +282,7 @@ class jeewatchdog extends eqLogic {
 	/**
 	 * Fonction interne pour isoler le calcul de la signature Shelly
 	 */
-	private function injectShellyAuth($data, $password, $realm, $nonce, $nc) {
+	public function injectShellyAuth($data, $password, $realm, $nonce, $nc) {
 		$cnonce = rand(100000, 999999); 
 		
 		$ha1 = hash('sha256', "admin:" . $realm . ":" . $password);
@@ -536,6 +536,19 @@ class jeewatchdog extends eqLogic {
 		}
 	}
 
+	public function pingDevice() {
+		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
+		$data = [
+			"id" => 1,
+			"method" => "Script.Eval",
+			"params" => [
+				"id" => 1,
+				"code" => "setCounterRemote(" . $watchdogTimeout . ")"
+			]
+		];
+		$this->postToDevice($data);
+	}
+
 	/*     * **********************Getteur Setteur*************************** */
 }
 
@@ -560,6 +573,10 @@ class jeewatchdogCmd extends cmd {
 
 	// Exécution d'une commande
 	public function execute($_options = array()) {
+		if ($this->getLogicalId() == 'ping') {
+			log::add("jeewatchdog","info","PING DEV");
+			$this->getEqLogic()->pingDevice();
+		}
 	}
 
 	/*     * **********************Getteur Setteur*************************** */
