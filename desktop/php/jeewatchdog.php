@@ -1,4 +1,5 @@
 <?php
+# vi: tabstop=4 autoindent
 if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
@@ -128,36 +129,43 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
 							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Nom du paramètre n°1}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le paramètre n°1 de l'équipement}}"></i></sup>
+								<label class="col-sm-4 control-label">{{Modèle d'équipement}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Le switch qui doit être pingué régulièrement}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="param1" placeholder="{{Paramètre n°1}}">
+									<select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceModel">
+										<option value="shellyplus1" selected >Shelly Plus1</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label"> {{addresse IP du switch}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceIP">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="col-sm-4 control-label"> {{Mot de passe}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
-								</div>
-							</div>
-							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
-							<!-- La fonction cron de la classe du plugin doit contenir le code prévu pour que ce champ soit fonctionnel -->
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Auto-actualisation}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Fréquence de rafraîchissement des commandes infos de l'équipement}}"></i></sup>
+									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe du switch}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
 									<div class="input-group">
-										<input type="text" class="eqLogicAttr form-control roundedLeft" data-l1key="configuration" data-l2key="autorefresh" placeholder="{{Cliquer sur ? pour afficher l'assistant cron}}">
+										<input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
 										<span class="input-group-btn">
-											<a class="btn btn-default cursor jeeHelper roundedRight" data-helper="cron" title="Assistant cron">
-												<i class="fas fa-question-circle"></i>
-											</a>
-										</span>
+											<a class="btn btn-default form-control bt_showPass roundRight"><i class="fas fa-eye"></i></a>
+										<span>
 									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-4">
+								</div>
+								<div class="col-sm-6">
+									<a class="btn btn-sm btn-success eqLogicAction pull-right" data-action="configureDevice">
+										<i class="fas fa-magic"></i> {{Configurer le switch}}
+									</a>
 								</div>
 							</div>
 						</div>

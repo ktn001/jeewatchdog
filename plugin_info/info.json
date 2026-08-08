@@ -2,46 +2,12 @@
     "id": "jeewatchdog",
     "name": "jeewatchdog",
     "pluginVersion": "0.1",
-    "specialAttributes": {
-        "object": {
-            "toto": {
-                "name": {
-                    "fr_FR": "Plop je suis un attribut sp\u00e9cial"
-                },
-                "type": "input"
-            },
-            "toto2": {
-                "name": {
-                    "fr_FR": "Plop je suis un attribut sp\u00e9cial number"
-                },
-                "type": "number"
-            }
-        },
-        "user": {
-            "toto": {
-                "name": {
-                    "fr_FR": "Plop je suis un attribut sp\u00e9cial"
-                },
-                "type": "select",
-                "values": [
-                    {
-                        "value": "1",
-                        "name": "valeur 1"
-                    },
-                    {
-                        "value": "plop",
-                        "name": "valeur plop"
-                    }
-                ]
-            }
-        }
-    },
     "description": {
-        "fr_FR": "Template servant de base \u00e0 la cr\u00e9ation de plugins pour Jeedom"
+        "fr_FR": "watchdog permettant de couper l'alimentation durant quelques secondes pour un redémarrage hard de jeedom"
     },
     "licence": "AGPL",
-    "author": "Jeedom SAS",
-    "require": "4.2",
+    "author": "ktn",
+    "require": "4.5.3",
     "os": {
         "min": 10,
         "max": 12.99
