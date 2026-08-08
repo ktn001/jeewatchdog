@@ -22,9 +22,9 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 class jeewatchdog extends eqLogic {
 	/*     * *************************Attributs****************************** */
 
-	private $currentNonce = null;
-	private $currentRealm = null;
-	private $ncCounter    = 0;
+	private $_currentNonce = null;
+	private $_currentRealm = null;
+	private $_ncCounter    = 0;
 
 	/*
 	* Permet de définir les possibilités de personnalisation du widget (en cas d'utilisation de la fonction 'toHtml' par exemple)
@@ -122,7 +122,6 @@ class jeewatchdog extends eqLogic {
 
 	// Fonction exécutée automatiquement après la création de l'équipement
 	public function postInsert() {
-		$this->createMaintenanceCmd();
 	}
 
 	// Fonction exécutée automatiquement avant la mise à jour de l'équipement
@@ -135,10 +134,17 @@ class jeewatchdog extends eqLogic {
 
 	// Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
 	public function preSave() {
+		if ($this->getConfiguration('watchdogTimeout', 0) == 0) {
+			$this->setConfiguration('watchdogTimeout', 15);
+		}
+		if ($this->getConfiguration('offDuration', 0) == 0) {
+			$this->setConfiguration('offDuration', 3);
+		}
 	}
 
 	// Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
 	public function postSave() {
+		$this->createCmds();
 	}
 
 	// Fonction exécutée automatiquement avant la suppression de l'équipement
@@ -165,18 +171,28 @@ class jeewatchdog extends eqLogic {
 	public function toHtml($_version = 'dashboard') {}
 	*/
 
-	public function createMaintenanceCmd() {
+	public function createCmds() {
 		$cmd = $this->getCmd('info','maintenance');
-		if (is_object($cmd)) {
-			return;
+		if (!is_object($cmd)) {
+			$cmd = new jeewatchdogCmd();
+			$cmd->setEqLogic_Id($this->getId());
+			$cmd->setType('info');
+			$cmd->setSubType('binary');
+			$cmd->setLogicalId('maintenance');
+			$cmd->setName('maintenance');
+			$cmd->save();
 		}
-		$cmd = new jeewatchdogCmd();
-		$cmd->setEqLogic_Id($this->getId());
-		$cmd->setType('info');
-		$cmd->setSubType('binary');
-		$cmd->setLogicalId('maintenance');
-		$cmd->setName('maintenance');
-		$cmd->save();
+
+		$cmd = $this->getCmd('info','ping');
+		if (!is_object($cmd)) {
+			$cmd = new jeewatchdogCmd();
+			$cmd->setEqLogic_Id($this->getId());
+			$cmd->setType('action');
+			$cmd->setSubType('other');
+			$cmd->setLogicalId('ping');
+			$cmd->setName('ping');
+			$cmd->save();
+		}
 	}
 
 	private function postToDevice($data) {
@@ -184,9 +200,9 @@ class jeewatchdog extends eqLogic {
 		$password = $this->getConfiguration('password');
 	
 		// 1. Si nous avons déjà un nonce en mémoire, on tente directement une requête signée
-		if ($this->currentNonce !== null) {
-			$this->ncCounter++; // Incrémentation du compteur à chaque nouvel appel
-			$data = $this->injectShellyAuth($data, $password, $this->currentRealm, $this->currentNonce, $this->ncCounter);
+		if ($this->_currentNonce !== null) {
+			$this->_ncCounter++; // Incrémentation du compteur à chaque nouvel appel
+			$data = $this->injectShellyAuth($data, $password, $this->_currentRealm, $this->_currentNonce, $this->_ncCounter);
 		}
 	
 		$ch = curl_init('http://' . $deviceIP . "/rpc");
@@ -224,12 +240,12 @@ class jeewatchdog extends eqLogic {
 			}
 	
 			// Sauvegarde des nouvelles informations dans l'instance de classe
-			$this->currentNonce = $vars['nonce'];
-			$this->currentRealm = $vars['realm'];
-			$this->ncCounter    = 1; // On réinitialise le compteur à 1 pour ce nouveau nonce
+			$this->_currentNonce = $vars['nonce'];
+			$this->_currentRealm = $vars['realm'];
+			$this->_ncCounter    = 1; // On réinitialise le compteur à 1 pour ce nouveau nonce
 	
 			// On injecte la nouvelle authentification fraîchement générée
-			$data = $this->injectShellyAuth($data, $password, $this->currentRealm, $this->currentNonce, $this->ncCounter);
+			$data = $this->injectShellyAuth($data, $password, $this->_currentRealm, $this->_currentNonce, $this->_ncCounter);
 			
 			// Deuxième essai avec les bonnes informations
 			$ch = curl_init('http://' . $deviceIP . "/rpc");
@@ -406,6 +422,7 @@ class jeewatchdog extends eqLogic {
 				$path .= '&id=' . $cmdId;
 				$path .= '&value=1';
 
+				log::add(__CLASS__,"info", sprintf(__("Création du webhook pour %s",__FILE__),"Maintenace ON"));
 				foreach ($ips as $ip) {
 					$urls[] = 'http://' . $ip . $path;
 				}
@@ -431,6 +448,7 @@ class jeewatchdog extends eqLogic {
 				$path .= '&id=' . $cmdId;
 				$path .= '&value=0';
 
+				log::add(__CLASS__,"info", sprintf(__("Création du webhook pour %s",__FILE__),"Maintenace OFF"));
 				foreach ($ips as $ip) {
 					$urls[] = 'http://' . $ip . $path;
 				}
@@ -447,36 +465,71 @@ class jeewatchdog extends eqLogic {
 				];
 				$answer = $this->postToDevice($data);
 
+				/* Récupération de la liste des scripts */
+				$data = [
+					"id"     => $id++,
+					"method" => "Script.List",
+				];
+				$answer = $this->postToDevice($data);
+				$scripts = $answer['result']['scripts'];
 
+				/* Suppression des scripts */
+				foreach ($scripts as $script) {
+					$data = [
+						"id"     => $id++,
+						"method" => "Script.Delete",
+						"params" => [
+							"id" => $script['id']
+						]
+					];
+					$this->postToDevice($data);
+				}
 
-// (
-// 	[id] => 1
-// 	[cid] => 0
-// 	[enable] => 1
-// 	[event] => input.toggle_on
-// 	[name] => Maintenance ON
-// 	[ssl_ca] => ca.pem
-// 	[urls] => Array
-// 	(
-// 		[0] => http://10.0.1.12/core/api/jeeApi.php?plugin=virtual&type=event&apikey=66Zyfkqc7uwhgRTdqAus4r8F3ku7JFIL&id=6721&value=1
-// 	)
-// 	[condition] =>
-// 	[repeat_period] => 0
-// )
-// (
-// 	[id] => 2
-// 	[cid] => 0
-// 	[enable] => 1
-// 	[event] => input.toggle_off
-// 	[name] => Maintenance OFF
-// 	[ssl_ca] => ca.pem
-// 	[urls] => Array
-// 	(
-// 		[0] => http://10.0.1.12/core/api/jeeApi.php?plugin=virtual&type=event&apikey=66Zyfkqc7uwhgRTdqAus4r8F3ku7JFIL&id=6721&value=0
-// 	)
-// 	[condition] =>
-// 	[repeat_period] => 0
-// )
+				/* Creation du script */
+				$scriptFile = __DIR__ . '/../config/' . $this->getConfiguration('deviceModel') . '.js';
+				$codejs = file_get_contents($scriptFile);
+				$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
+				$codejs = str_replace('#watchdogTimeout#', $watchdogTimeout, $codejs);
+				$codejs = str_replace('#offDuration#', $this->getConfiguration('offDuration'), $codejs);
+
+				$data = [
+					"id"     => $id++,
+					"method" => "Script.Create",
+					"params" => [
+						"name" => $jeedomName . "_watch"
+					]
+				];
+				$answer = $this->postToDevice($data);
+				$scriptId = $answer['result']['id'];
+				$data = [
+					"id"     => $id++,
+					"method" => "Script.putCode",
+					"params" => [
+						"id" => $scriptId,
+						"code" => $codejs
+					]
+				];
+				$answer = $this->postToDevice($data);
+				$data = [
+					"id"     => $id++,
+					"method" => "Script.SetConfig",
+					"params" => [
+						"id" => $scriptId,
+						"config" => [
+							"enable" => true
+						]
+					]
+				];
+				$answer = $this->postToDevice($data);
+				$data = [
+					"id"     => $id++,
+					"method" => "Script.Start",
+					"params" => [
+						"id" => $scriptId,
+					]
+				];
+				$answer = $this->postToDevice($data);
+
 				break;
 			default:
 				throw new Exception (__('Device non supporté',__FILE__));
@@ -500,10 +553,10 @@ class jeewatchdogCmd extends cmd {
 
 	/*
 	* Permet d'empêcher la suppression des commandes même si elles ne sont pas dans la nouvelle configuration de l'équipement envoyé en JS
+	*/
 	public function dontRemoveCmd() {
 		return true;
 	}
-	*/
 
 	// Exécution d'une commande
 	public function execute($_options = array()) {

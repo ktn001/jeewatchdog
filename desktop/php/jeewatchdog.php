@@ -139,7 +139,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-4 control-label"> {{addresse IP du switch}}
+								<label class="col-sm-4 control-label">{{addresse IP du switch}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
@@ -147,7 +147,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-4 control-label"> {{Mot de passe}}
+								<label class="col-sm-4 control-label">{{Mot de passe}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe du switch}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
@@ -157,6 +157,22 @@ $eqLogics = eqLogic::byType($plugin->getId());
 											<a class="btn btn-default form-control bt_showPass roundRight"><i class="fas fa-eye"></i></a>
 										<span>
 									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">{{Temps max d'inactivité}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Temps limite (en minutes) avant que le watchdog coupe l'alimentation du Jeedom}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<input type="number" class="eqLogicAttr form-control tooltips" title="Minutes"  data-l1key="configuration" data-l2key="watchdogTimeout">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">{{Temps de coupure}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Durée (en secondes) de la coupure d'alimentation}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<input type="number" class="eqLogicAttr form-control tooltips" title="Secondes"  data-l1key="configuration" data-l2key="offDuration">
 								</div>
 							</div>
 							<div class="form-group">
@@ -187,7 +203,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 			<!-- Onglet des commandes de l'équipement -->
 			<div role="tabpanel" class="tab-pane" id="commandtab">
-				<a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
 				<br><br>
 				<div class="table-responsive">
 					<table id="table_cmd" class="table table-bordered table-condensed">
@@ -195,7 +210,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 							<tr>
 								<th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
 								<th style="min-width:200px;width:350px;">{{Nom}}</th>
-								<th>{{Type}}</th>
+								<th style="width:130px;">{{Type}}</th>
 								<th style="min-width:260px;">{{Options}}</th>
 								<th>{{Etat}}</th>
 								<th style="min-width:80px;width:200px;">{{Actions}}</th>
