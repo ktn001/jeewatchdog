@@ -113,7 +113,7 @@ class jeewatchdog extends eqLogic {
 	}
 
 	private function getCron($createNew = true) {
-		$options = ['EqLogic_id' => $this->getId()];
+		$options = ['EqLogic_id' => intval($this->getId())];
 		$cron = cron::byClassAndFunction(__CLASS__, 'kickWatchdog', $options);
 		if (!is_object($cron) && $createNew) {
 			log::add(__CLASS__,'debug',sprintf(__("Création du cron pour %s (id: %s)", __FILE__),$this->getName(),$this->getId()));
