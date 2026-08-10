@@ -127,7 +127,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 
-							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
+							<legend><i class="fas fa-dog"></i> {{Paramètres du watchdog}}</legend>
 							<div class="form-group">
 								<label class="col-sm-4 control-label">{{Modèle d'équipement}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Le switch qui doit être pingué régulièrement}}"></i></sup>
@@ -139,7 +139,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-4 control-label">{{addresse IP du switch}}
+								<label class="col-sm-4 control-label">{{Addresse IP du switch}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
@@ -173,6 +173,17 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</label>
 								<div class="col-sm-6">
 									<input type="number" class="eqLogicAttr form-control tooltips" title="Secondes"  data-l1key="configuration" data-l2key="offDuration">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">{{Déclencheur du Kick}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Déclencheur de l'envoi du ping}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="kickmode">
+										<option value="cron" selected >cron</option>
+										<option value="scenario" selected >scenario</option>
+									</select>
 								</div>
 							</div>
 							<div class="form-group">

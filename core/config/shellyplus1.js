@@ -33,7 +33,7 @@ Timer.set(1000, true, function() {
       return;
     }
 
-    // 2. Si pas de maintenance, on gère l'attente de fin de cycle
+    // 2. Si pas de maintenance, on gere l'attente de fin de cycle
     if (isWaiting) return;
 
     // 3. Decompte standard

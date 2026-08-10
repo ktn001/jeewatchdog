@@ -26,82 +26,9 @@ class jeewatchdog extends eqLogic {
 	private $_currentRealm = null;
 	private $_ncCounter    = 0;
 
-	/*
-	* Permet de définir les possibilités de personnalisation du widget (en cas d'utilisation de la fonction 'toHtml' par exemple)
-	* Tableau multidimensionnel - exemple: array('custom' => true, 'custom::layout' => false)
-	public static $_widgetPossibility = array();
-	*/
-
-	/*
-	* Permet de crypter/décrypter automatiquement des champs de configuration du plugin
-	* Exemple : "param1" & "param2" seront cryptés mais pas "param3"
-	public static $_encryptConfigKey = array('param1', 'param2');
-	*/
-
 	/*     * ***********************Methode static*************************** */
 
-	/*
-	* Fonction exécutée automatiquement toutes les minutes par Jeedom
-	public static function cron() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
-	public static function cron5() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
-	public static function cron10() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
-	public static function cron15() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
-	public static function cron30() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement toutes les heures par Jeedom
-	public static function cronHourly() {}
-	*/
-
-	/*
-	* Fonction exécutée automatiquement tous les jours par Jeedom
-	public static function cronDaily() {}
-	*/
-	
-	/*
-	* Permet de déclencher une action avant modification d'une variable de configuration du plugin
-	* Exemple avec la variable "param3"
-	public static function preConfig_param3( $value ) {
-		// do some checks or modify on $value
-		return $value;
-	}
-	*/
-
-	/*
-	* Permet de déclencher une action après modification d'une variable de configuration du plugin
-	* Exemple avec la variable "param3"
-	public static function postConfig_param3($value) {
-		// no return value
-	}
-	*/
-
-	/*
-	 * Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
-	 * lors de la création semi-automatique d'un post sur le forum community
-	  public static function getConfigForCommunity() {
-		  // Cette function doit retourner des infos complémentataires sous la forme d'un
-		  // string contenant les infos formatées en HTML.
-		  return "les infos essentiel de mon plugin";
-	  }
-	 */
-
+	/* Traitement des event reçus de watchdog via l'API de jeedom */
 	public static function event() {
 		log::add(__CLASS__,'debug', json_encode($_GET));
 		if (init('id') != '') {
@@ -109,30 +36,26 @@ class jeewatchdog extends eqLogic {
 			if (!is_object($cmd) || $cmd->getEqType() != __CLASS__) {
 				throw new Exception(sprintf(__('Commande %s introuvable ou pas de type %s', __FILE__), init('id'), __CLASS__));
 			}
-		} 
+		}
 		$cmd->event(init('value'));
+	}
+
+	public static function kickWatchdog($_options) {
+		log::add(__CLASS__, 'debug', 'kickWatchdog');
+
+		$jeewatchdog = eqLogic::byId($_options['EqLogic_id']);
+		if (is_object($jeewatchdog) && $jeewatchdog->getIsEnable() == 1) {
+			$jeewatchdog->_kickWatchdog();
+		}
 	}
 
 	/*     * *********************Méthodes d'instance************************* */
 
-	// Fonction exécutée automatiquement avant la création de l'équipement
 	public function preInsert() {
 		$this->setConfiguration('deviceModel', 'shellyplus1');
+		$this->setConfiguration('kickmode', 'cron');
 	}
 
-	// Fonction exécutée automatiquement après la création de l'équipement
-	public function postInsert() {
-	}
-
-	// Fonction exécutée automatiquement avant la mise à jour de l'équipement
-	public function preUpdate() {
-	}
-
-	// Fonction exécutée automatiquement après la mise à jour de l'équipement
-	public function postUpdate() {
-	}
-
-	// Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
 	public function preSave() {
 		if ($this->getConfiguration('watchdogTimeout', 0) == 0) {
 			$this->setConfiguration('watchdogTimeout', 15);
@@ -142,17 +65,16 @@ class jeewatchdog extends eqLogic {
 		}
 	}
 
-	// Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
 	public function postSave() {
 		$this->createCmds();
+		$this->createOrUpdateCron();
 	}
 
-	// Fonction exécutée automatiquement avant la suppression de l'équipement
 	public function preRemove() {
-	}
-
-	// Fonction exécutée automatiquement après la suppression de l'équipement
-	public function postRemove() {
+		$cron = $this->getCron(false);
+		if (is_object($cron)) {
+			$cron->remove();
+		}
 	}
 
 	/*
@@ -166,11 +88,6 @@ class jeewatchdog extends eqLogic {
 		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
 	}
 
-	/*
-	* Permet de modifier l'affichage du widget (également utilisable par les commandes)
-	public function toHtml($_version = 'dashboard') {}
-	*/
-
 	public function createCmds() {
 		$cmd = $this->getCmd('info','maintenance');
 		if (!is_object($cmd)) {
@@ -183,7 +100,7 @@ class jeewatchdog extends eqLogic {
 			$cmd->save();
 		}
 
-		$cmd = $this->getCmd('info','ping');
+		$cmd = $this->getCmd('action','ping');
 		if (!is_object($cmd)) {
 			$cmd = new jeewatchdogCmd();
 			$cmd->setEqLogic_Id($this->getId());
@@ -195,16 +112,61 @@ class jeewatchdog extends eqLogic {
 		}
 	}
 
+	private function getCron($createNew = true) {
+		$options = ['EqLogic_id' => $this->getId()];
+		$cron = cron::byClassAndFunction(__CLASS__, 'kickWatchdog', $options);
+		if (!is_object($cron) && $createNew) {
+			log::add(__CLASS__,'debug',sprintf(__("Création du cron pour %s (id: %s)", __FILE__),$this->getName(),$this->getId()));
+			$cron = new cron();
+			$cron->setClass(__CLASS__);
+			$cron->setFunction('kickWatchdog');
+			$cron->setOption($options);
+			$cron->setDeamon(0);
+		}
+		return $cron;
+	}
+
+	private function createOrUpdateCron() {
+		if ($this->getConfiguration("kickmode") != 'cron') {
+			$cron = $this->getCron(false);
+			if (is_object($cron)) {
+				$cron->remove();
+			}
+			return;
+		}
+		$watchdogTimeout = $this->getConfiguration('watchdogTimeout');
+		if ($watchdogTimeout == '') {
+			log::add(__CLASS__,'warning',__("Le timeout du watchdog n'est pas défini!"));
+			return;
+		}
+		$watchdogTimeout = intval($watchdogTimeout);
+		$minutes = 10;
+		if ($watchdogTimeout <= 30) {
+			$minutes = 5;
+		}
+		if ($watchdogTimeout <= 15) {
+			$minutes = 3;
+		}
+		if ($watchdogTimeout <= 10) {
+			$minutes = 1;
+		}
+		$cron = $this->getCron();
+		$cron->setSchedule("*/{$minutes} * * * *");
+		$cron->setTimeout(1);
+		$cron->setEnable($this->getIsEnable());
+		$cron->save();
+	}
+
 	public function postToDevice($data) {
 		$deviceIP = $this->getConfiguration('deviceIP');
 		$password = $this->getConfiguration('password');
-	
+
 		// 1. Si nous avons déjà un nonce en mémoire, on tente directement une requête signée
 		if ($this->_currentNonce !== null) {
 			$this->_ncCounter++; // Incrémentation du compteur à chaque nouvel appel
 			$data = $this->injectShellyAuth($data, $password, $this->_currentRealm, $this->_currentNonce, $this->_ncCounter);
 		}
-	
+
 		$ch = curl_init('http://' . $deviceIP . "/rpc");
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -212,13 +174,13 @@ class jeewatchdog extends eqLogic {
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 		$response = curl_exec($ch);
-	
+
 		$headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 		$header = substr($response, 0, $headerSize);
 		$body = substr($response, $headerSize);
 		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
-	
+
 		// 2. Si le nonce a expiré entre temps ou si c'est le tout premier appel (401)
 		if ($code == 401) {
 			$headers = explode("\n", $header);
@@ -234,19 +196,19 @@ class jeewatchdog extends eqLogic {
 					break;
 				}
 			}
-			
+
 			if (count($vars) == 0){
 				throw new Exception(__("Infos d'authentification non fournies", __FILE__));
 			}
-	
+
 			// Sauvegarde des nouvelles informations dans l'instance de classe
 			$this->_currentNonce = $vars['nonce'];
 			$this->_currentRealm = $vars['realm'];
 			$this->_ncCounter    = 1; // On réinitialise le compteur à 1 pour ce nouveau nonce
-	
+
 			// On injecte la nouvelle authentification fraîchement générée
 			$data = $this->injectShellyAuth($data, $password, $this->_currentRealm, $this->_currentNonce, $this->_ncCounter);
-			
+
 			// Deuxième essai avec les bonnes informations
 			$ch = curl_init('http://' . $deviceIP . "/rpc");
 			curl_setopt($ch, CURLOPT_POST, true);
@@ -255,18 +217,18 @@ class jeewatchdog extends eqLogic {
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 			$response = curl_exec($ch);
-	
+
 			$headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 			$header = substr($response, 0, $headerSize);
 			$body = substr($response, $headerSize);
 			$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 			curl_close($ch);
 		}
-	
+
 		if ($code == 401) {
 			throw new Exception (__("Accès au switch non autorisé. Veuillez vérifier le password.",__FILE__));
 		}
-		
+
 		if ($code != 200) {
 			log::add(__CLASS__, "error", "Code HTTP final : " . $code);
 			log::add(__CLASS__, "error", "header: ". $header);
@@ -275,32 +237,32 @@ class jeewatchdog extends eqLogic {
 		}
 		log::add(__CLASS__, "debug", "Code HTTP final : " . $code);
 		log::add(__CLASS__, "debug", "body: ". $body);
-		
+
 		return json_decode($body, true);
 	}
-	
+
 	/**
 	 * Fonction interne pour isoler le calcul de la signature Shelly
 	 */
 	public function injectShellyAuth($data, $password, $realm, $nonce, $nc) {
-		$cnonce = rand(100000, 999999); 
-		
+		$cnonce = rand(100000, 999999);
+
 		$ha1 = hash('sha256', "admin:" . $realm . ":" . $password);
 		$ha2 = hash('sha256', "dummy_method:dummy_uri");
-		
+
 		$responseParts = [$ha1, $nonce, (string)$nc, (string)$cnonce, 'auth', $ha2];
 		$responseHash = hash('sha256', implode(':', $responseParts));
-	
+
 		$data['auth'] = [
 			'realm'    => $realm,
 			'username' => 'admin',
 			'nonce'    => $nonce,
 			'cnonce'   => $cnonce,
-			'nc'       => $nc, 
+			'nc'       => $nc,
 			'response' => $responseHash,
 			'algorithm'=> 'SHA-256'
 		];
-		
+
 		return $data;
 	}
 
@@ -536,7 +498,7 @@ class jeewatchdog extends eqLogic {
 		}
 	}
 
-	public function pingDevice() {
+	public function _kickWatchdog() {
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
 		$data = [
 			"id" => 1,
@@ -574,8 +536,8 @@ class jeewatchdogCmd extends cmd {
 	// Exécution d'une commande
 	public function execute($_options = array()) {
 		if ($this->getLogicalId() == 'ping') {
-			log::add("jeewatchdog","info","PING DEV");
-			$this->getEqLogic()->pingDevice();
+			log::add("jeewatchdog","info","Kick watchdog");
+			$this->getEqLogic()->_kickWatchdog();
 		}
 	}
 
