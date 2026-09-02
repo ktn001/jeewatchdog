@@ -22,7 +22,9 @@
 	"hasOwnDeamon": false,
 	"documentation": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
 	"changelog": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
-	"link": {
+	"documentation_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
+	"changelog_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
+	"xlink": {
 		"forum": "Lien vers le forum",
 		"video": "Lien vers une video"
 	},
