@@ -20,8 +20,8 @@
 	"category": "monitoring",
 	"hasDependency": false,
 	"hasOwnDeamon": false,
-	"documentation": "https://docsjeedom.com/plugins/jeewatchdog/#language#/index.html",
-	"changelog": "https://docsjeedom.com/plugins/jeewatchdog/#language#/changelog.html",
+	"documentation": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
+	"changelog": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
 	"link": {
 		"forum": "Lien vers le forum",
 		"video": "Lien vers une video"
