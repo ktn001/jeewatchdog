@@ -20,10 +20,8 @@
 	"category": "monitoring",
 	"hasDependency": false,
 	"hasOwnDeamon": false,
-	"changelog_beta": "https://doc.jeedom.com/#language#/plugins/programming/jeewatchdog/beta/changelog",
-	"changelog": "https://doc.jeedom.com/#language#/plugins/programming/jeewatchdog/changelog",
-	"documentation_beta": "https://doc.jeedom.com/#language#/plugins/programming/jeewatchdog/beta",
-	"documentation": "https://doc.jeedom.com/#language#/plugins/programming/jeewatchdog",
+	"documentation": "https://docsjeedom.com/plugins/jeewatchdog/#language#/index.html",
+	"changelog": "https://docsjeedom.com/plugins/jeewatchdog/#language#/changelog.html",
 	"link": {
 		"forum": "Lien vers le forum",
 		"video": "Lien vers une video"
