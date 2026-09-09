@@ -134,7 +134,17 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</label>
 								<div class="col-sm-6">
 									<select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceModel">
+										<?php
+										$models = jeewatchdog::getModel();
+										foreach ($models as $key => $model) {
+											$label = $model['label'];
+											echo "<option value=$key>$label</option>";
+										}
+										?>
+										<!--
 										<option value="shellyplus1" selected >Shelly Plus1</option>
+										<option value="shelly1Gen4" selected >Shelly 1 Gen4</option>
+										-->
 									</select>
 								</div>
 							</div>
