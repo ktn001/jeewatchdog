@@ -1,0 +1,27 @@
+{
+	"shellyplus1": {
+		"label": "Shelly Plus 1",
+		"modbus": 0,
+		"knx": 0
+	},
+	"Shelly1Gen3": {
+		"label": "Shelly 1 Gen3",
+		"modbus": 0,
+		"knx" : 1
+	},
+	"Shelly1MiniGen3": {
+		"label": "Shelly 1 Mini Gen3",
+		"modbus": 0,
+		"knx" : 1
+	},
+	"Shelly1Gen4": {
+		"label": "Shelly 1 Gen4",
+		"modbus": 1,
+		"knx" : 1
+	},
+	"Shelly1MiniGen4": {
+		"label": "Shelly 1 Mini Gen4",
+		"modbus": 1,
+		"knx" : 1
+	}
+}

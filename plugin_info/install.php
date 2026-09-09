@@ -19,10 +19,18 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 // Fonction exécutée automatiquement après l'installation du plugin
 function jeewatchdog_install() {
+	$packagesjson = __DIR__ . '/packages.json';
+	if (file_exists($packagesjson)){
+		unlink($packagesjson);
+	}
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function jeewatchdog_update() {
+	$packagesjson = __DIR__ . '/packages.json';
+	if (file_exists($packagesjson)){
+		unlink($packagesjson);
+	}
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin
