@@ -28,7 +28,8 @@
         "Le modèle %s est inconnu.": "Das Modell %s ist unbekannt.",
         "Le timeout du watchdog n'est pas défini!": "Das Watchdog-Timeout ist nicht definiert!",
         "Liste des actions de l'interrupeur": "Liste der Schalterfunktionen",
-        "Suppression du webhook %s": "Webhook %s löschen"
+        "Suppression du webhook %s": "Webhook %s löschen",
+        "maintenance": "Wartung"
     },
     "plugins\/jeewatchdog\/desktop\/js\/jeewatchdog.js": {
         "Afficher": "Anzeige",
