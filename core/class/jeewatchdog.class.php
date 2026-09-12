@@ -132,14 +132,14 @@ class jeewatchdog extends eqLogic {
 	 ** Création des commandes
 	 **/
 	public function createCmds() {
-		$cmd = $this->getCmd('info',__('maintenance',__FILE__));
+		$cmd = $this->getCmd('info','maintenance');
 		if (!is_object($cmd)) {
 			$cmd = new jeewatchdogCmd();
 			$cmd->setEqLogic_Id($this->getId());
 			$cmd->setType('info');
 			$cmd->setSubType('binary');
 			$cmd->setLogicalId('maintenance');
-			$cmd->setName('maintenance');
+			$cmd->setName(__('maintenance',__FILE__));
 			$cmd->save();
 		}
 
@@ -149,8 +149,8 @@ class jeewatchdog extends eqLogic {
 			$cmd->setEqLogic_Id($this->getId());
 			$cmd->setType('action');
 			$cmd->setSubType('other');
-			$cmd->setLogicalId('ping');
-			$cmd->setName('ping');
+			$cmd->setLogicalId('kick');
+			$cmd->setName('kick');
 			$cmd->save();
 		}
 	}
@@ -816,7 +816,7 @@ class jeewatchdogCmd extends cmd {
 
 	// Exécution d'une commande
 	public function execute($_options = array()) {
-		if ($this->getLogicalId() == 'ping') {
+		if ($this->getLogicalId() == 'kick') {
 			log::add("jeewatchdog","info","Kick watchdog");
 			$this->getEqLogic()->_kickWatchdog();
 		}

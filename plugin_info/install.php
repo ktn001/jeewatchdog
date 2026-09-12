@@ -17,20 +17,53 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-// Fonction exécutée automatiquement après l'installation du plugin
-function jeewatchdog_install() {
+function jeewatchdog_goto_2() {
+	foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
+		$cmd = $eqLogic->getCmd('action','ping');
+		if (is_object($cmd)) {
+			$cmd->setLogicalId('kick');
+			$cmd->save();
+		}
+	}
+}
+
+function jeewatchdog_goto_1() {
 	$packagesjson = __DIR__ . '/packages.json';
 	if (file_exists($packagesjson)){
 		unlink($packagesjson);
 	}
 }
 
+function jeewatchdog_upgrade() {
+	$lastLevel = 2;
+
+	$pluginLevel = config::byKey('pluginLevel', 'jeewatchdog', 0);
+	log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel . " => " . $lastLevel);
+	for ($level = 0; $level <= $lastLevel; $level++) {
+		if ($pluginLevel < $level) {
+			$function = 'jeewatchdog_goto_' . $level;
+			if (function_exists($function)) {
+				log::add("jeewatchdog","debug","execution de " . $function . "()");
+				$function();
+			}
+			config::save('pluginLevel',$level,'jeewatchdog');
+			$pluginLevel = $level;
+			log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel);
+		}
+	}
+}
+
+
+// Fonction exécutée automatiquement après l'installation du plugin
+function jeewatchdog_install() {
+	log::add("jeewatchdog","info","Lancement de 'jeewatchdog_install()'");
+	jeewatchdog_upgrade();
+}
+
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function jeewatchdog_update() {
-	$packagesjson = __DIR__ . '/packages.json';
-	if (file_exists($packagesjson)){
-		unlink($packagesjson);
-	}
+	log::add("jeewatchdog","info","Lancement de 'jeewatchdog_update()'");
+	jeewatchdog_upgrade();
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin
