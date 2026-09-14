@@ -1,6 +1,6 @@
 {
 	"id": "jeewatchdog",
-	"name": "jeewatchdog",
+	"name": "JeeWatchdog",
 	"pluginVersion": "0.1",
 	"description": {
 		"fr_FR": "watchdog permettant de couper l'alimentation durant quelques secondes pour un redémarrage hard de jeedom",
