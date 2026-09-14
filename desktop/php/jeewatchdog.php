@@ -186,7 +186,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Déclencheur du Kick}}
+								<label class="col-sm-4 control-label">{{Déclencheur de Kicks}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Déclencheur de l'envoi du ping}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
