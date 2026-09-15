@@ -138,13 +138,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 										$models = jeewatchdog::getModel();
 										foreach ($models as $key => $model) {
 											$label = $model['label'];
-											echo "<option value=$key>$label</option>";
+											$nbSwitch = $model['nbSwitch'];
+											echo "<option value=$key data-nbswitch=$nbSwitch>$label</option>";
 										}
 										?>
-										<!--
-										<option value="shellyplus1" selected >Shelly Plus1</option>
-										<option value="shelly1Gen4" selected >Shelly 1 Gen4</option>
-										-->
 									</select>
 								</div>
 							</div>
@@ -194,6 +191,21 @@ $eqLogics = eqLogic::byType($plugin->getId());
 										<option value="cron" selected >cron</option>
 										<option value="scenario" selected >scenario</option>
 									</select>
+								</div>
+							</div>
+							<div id="divPlugs" class="form-group switches">
+								<label class="col-sm-4 control-label">{{Prises à commander}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Prise à couper pour le redémarrage}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<?php
+									for ($i=1; $i<10; $i++) {
+										echo "<label class='checkbox-inline'>";
+										echo "<input type='checkbox' class='eqLogicAttr form-control' data-l1key='configuration' data-l2key='switches' data-l3key='$i'>";
+										echo "$i";
+										echo "</label>";
+									}
+									?>
 								</div>
 							</div>
 							<div class="form-group">

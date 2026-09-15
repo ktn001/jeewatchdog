@@ -726,12 +726,14 @@ class jeewatchdog extends eqLogic {
 		}
 
 		/* Creation du script */
-		$scriptFile = __DIR__ . '/../config/' . $this->getConfiguration('deviceModel') . '.js';
+		$model = jeewatchdog::getModel($this->getConfiguration('deviceModel'));
+		$scriptFile = __DIR__ . '/../config/' . $model['script'];;
 		$codejs = file_get_contents($scriptFile);
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
 		$codejs = str_replace('#watchdogTimeout#', $watchdogTimeout, $codejs);
 		$codejs = str_replace('#offDuration#', $this->getConfiguration('offDuration'), $codejs);
 
+		log::add(__CLASS__,"debug",sprintf(__("Création du script %s",__FILE__),$jeedomName . "_watch"));
 		$data = [
 			"id"     => $id++,
 			"method" => "Script.Create",
@@ -741,6 +743,7 @@ class jeewatchdog extends eqLogic {
 		];
 		$answer = $this->sendToDevice($data);
 		$scriptId = $answer['result']['id'];
+		log::add(__CLASS__,"debug",sprintf(__("Chargement du script %s",__FILE__),$scriptFile));
 		$data = [
 			"id"     => $id++,
 			"method" => "Script.putCode",
