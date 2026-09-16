@@ -15,7 +15,7 @@
 	"require": "4.5.3",
 	"os": {
 		"min": 10,
-		"max": 12.99
+		"max": 13.99
 	},
 	"category": "monitoring",
 	"hasDependency": false,
