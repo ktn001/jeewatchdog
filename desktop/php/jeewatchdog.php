@@ -150,7 +150,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
 									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceIP">
+									<div class="input-group">
+										<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceIP">
+										<span class="input-group-btn">
+											<a class="btn btn-default form-control bt_openShelly roundRight"><i class="fas fa-external-link-alt"></i></a>
+										</span>
+									</div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -162,7 +167,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 										<input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
 										<span class="input-group-btn">
 											<a class="btn btn-default form-control bt_showPass roundRight"><i class="fas fa-eye"></i></a>
-										<span>
+										</span>
 									</div>
 								</div>
 							</div>
@@ -199,10 +204,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</label>
 								<div class="col-sm-6">
 									<?php
-									for ($i=1; $i<10; $i++) {
+									for ($i=0; $i<10; $i++) {
 										echo "<label class='checkbox-inline'>";
 										echo "<input type='checkbox' class='eqLogicAttr form-control' data-l1key='configuration' data-l2key='switches' data-l3key='$i'>";
-										echo "$i";
+										echo $i+1;
 										echo "</label>";
 									}
 									?>

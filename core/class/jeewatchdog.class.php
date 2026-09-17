@@ -727,11 +727,44 @@ class jeewatchdog extends eqLogic {
 
 		/* Creation du script */
 		$model = jeewatchdog::getModel($this->getConfiguration('deviceModel'));
-		$scriptFile = __DIR__ . '/../config/' . $model['script'];;
+		$scriptFile = __DIR__ . '/../config/' . $model['script'];
+
+		$switchesToDrive = array();
+		if ($model['nbSwitch'] > 1) {
+			$switches = $this->getConfiguration('switches');
+			foreach ($switches as $switchId => $value){
+				if ($switchId >= $model['nbSwitch']) {
+					break;
+				}
+				if ($value == 1) {
+					$switchesToDrive[] = $switchId;
+				}
+			}
+		} else {
+			$switchesToDrive[] = 0;
+		}
+
+		if ($model['nbInput'] == 0) {
+			$inputId = -1;
+		} else {
+			$inputId = 0;
+		}
+			
+		log::add(__CLASS__,"info",sprintf(__("Préparation du script pour le switch %s",__FILE__),$switchId));
 		$codejs = file_get_contents($scriptFile);
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
-		$codejs = str_replace('#watchdogTimeout#', $watchdogTimeout, $codejs);
-		$codejs = str_replace('#offDuration#', $this->getConfiguration('offDuration'), $codejs);
+
+		$replace = array(
+			'#jeedomName#'      => $jeedomName,
+			'#jeedomKey#'       => config::byKey('jeedom::installKey'),
+			'#eqLogicName#'     => $this->getName(),
+			'#eqLogicId#'       => $this->getId(),
+			'#watchdogTimeout#' => $watchdogTimeout,
+			'#offDuration#'     => $this->getConfiguration('offDuration'),
+			'#relayId#'         => join(',',$switchesToDrive),
+			'#inputId#'         => $inputId,
+		);
+		$codejs = str_replace(array_keys($replace), $replace, $codejs);
 
 		log::add(__CLASS__,"debug",sprintf(__("Création du script %s",__FILE__),$jeedomName . "_watch"));
 		$data = [
