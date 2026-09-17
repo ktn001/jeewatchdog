@@ -31,8 +31,20 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 				jeewatchdogFrontEnd.configureDevice()
 				return
 			}
+
+			if (_target = event.target.closest(".bt_openShelly")) {
+				jeewatchdogFrontEnd.openShellyPage(_target)
+				return
+			}
 		})
-		let modelSelect = document.querySelector('.eqLogicAttr[data-l1key=configuration][data-l2key=model]')
+		document.getElementById("div_pageContainer").addEventListener("change", function(event){
+			let _target = null
+
+			if (_target = event.target.closest(".eqLogicAttr[data-l1key=configuration][data-l2key=deviceModel]")){
+				jeewatchdogFrontEnd.deviceChanged(_target)
+				return
+			}
+		})
 	}
 
 	/* Configuration du device */
@@ -55,6 +67,34 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 				}
           	}
 		})
+	}
+
+	/* Modification de la sélection de device */
+	jeewatchdogFrontEnd.deviceChanged = function(selector){
+		if (typeof selector.selectedOptions[0] !== 'undefined'){
+			let nbSwitches = selector.selectedOptions[0].dataset.nbswitch
+			if (nbSwitches < 2){
+				document.getElementById("div_pageContainer").querySelector("#divPlugs").unseen()
+			}else{
+				let divPlugs = document.getElementById("div_pageContainer").querySelector("#divPlugs")
+				divPlugs.seen()
+				divPlugs.querySelectorAll("[data-l2key='switches']").forEach(function(checkbox){
+					if (checkbox.dataset.l3key >= nbSwitches){
+						checkbox.closest('label').unseen()
+					} else {
+						checkbox.closest('label').seen()
+					}
+				})
+			}
+		}
+		
+	}
+
+	/* Ouverture de la page de config du Shelly */
+	jeewatchdogFrontEnd.openShellyPage = function(btn) {
+		let shelly = btn.closest('div.input-group').querySelector('input').jeeValue()
+		let url = 'http://' + shelly
+		window.open(url)
 	}
 
 	/* Affichage d'une commande */
