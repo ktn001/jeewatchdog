@@ -1,50 +1,50 @@
 {
-	"shellyplus1": {
-		"label": "Shelly Plus 1",
-		"nbSwitch": 1,
-		"nbInput": 1,
-		"modbus": 0,
-		"knx": 0,
-		"script": "shelly.js"
-	},
-	"Shelly1Gen3": {
-		"label": "Shelly 1 Gen3",
-		"nbSwitch": 1,
-		"nbInput": 1,
-		"modbus": 0,
-		"knx" : 1,
-		"script": "shelly.js"
-	},
-	"Shelly1MiniGen3": {
-		"label": "Shelly 1 Mini Gen3",
-		"nbSwitch": 1,
-		"nbInput": 1,
-		"modbus": 0,
-		"knx" : 1,
-		"script": "shelly.js"
-	},
-	"Shelly1Gen4": {
-		"label": "Shelly 1 Gen4",
-		"nbSwitch": 1,
-		"nbInput": 1,
-		"modbus": 1,
-		"knx" : 1,
-		"script": "shelly.js"
-	},
-	"Shelly1MiniGen4": {
-		"label": "Shelly 1 Mini Gen4",
-		"nbSwitch": 1,
-		"nbInput": 1,
-		"modbus": 1,
-		"knx" : 1,
-		"script": "shelly.js"
-	},
-	"ShellyPowerStrip4Gen4": {
-		"label": "Shelly Power Strip 4 Gen4",
-		"nbSwitch": 4,
-		"nbInput": 0,
-		"modbus": 0,
-		"knx" : 0,
-		"script": "shelly.js"
-	}
+  "shellyplus1": {
+    "label": "Shelly Plus 1",
+    "nbSwitch": 1,
+    "nbInput": 1,
+    "modbus": 0,
+    "knx": 0,
+    "script": "shelly.js"
+  },
+  "Shelly1Gen3": {
+    "label": "Shelly 1 Gen3",
+    "nbSwitch": 1,
+    "nbInput": 1,
+    "modbus": 0,
+    "knx": 1,
+    "script": "shelly.js"
+  },
+  "Shelly1MiniGen3": {
+    "label": "Shelly 1 Mini Gen3",
+    "nbSwitch": 1,
+    "nbInput": 1,
+    "modbus": 0,
+    "knx": 1,
+    "script": "shelly.js"
+  },
+  "Shelly1Gen4": {
+    "label": "Shelly 1 Gen4",
+    "nbSwitch": 1,
+    "nbInput": 1,
+    "modbus": 1,
+    "knx": 1,
+    "script": "shelly.js"
+  },
+  "Shelly1MiniGen4": {
+    "label": "Shelly 1 Mini Gen4",
+    "nbSwitch": 1,
+    "nbInput": 1,
+    "modbus": 1,
+    "knx": 1,
+    "script": "shelly.js"
+  },
+  "ShellyPowerStrip4Gen4": {
+    "label": "Shelly Power Strip 4 Gen4",
+    "nbSwitch": 4,
+    "nbInput": 0,
+    "modbus": 0,
+    "knx": 0,
+    "script": "shelly.js"
+  }
 }

@@ -1,48 +1,33 @@
 {
-	"id": "jeewatchdog",
-	"name": "JeeWatchdog",
-	"pluginVersion": "0.1",
-	"description": {
-		"fr_FR": "watchdog permettant de couper l'alimentation durant quelques secondes pour un redémarrage hard de jeedom",
-		"en_US": "A watchdog that cuts power for a few seconds to perform a hard reboot of Jeedom",
-		"es_ES": "programa de vigilancia que permite cortar la alimentación durante unos segundos para realizar un reinicio forzado de Jeedom",
-		"de_DE": "Watchdog, der die Stromversorgung für einige Sekunden unterbricht, um einen Hard-Neustart von Jeedom durchzuführen",
-		"it_IT": "watchdog che consente di interrompere l'alimentazione per alcuni secondi per un riavvio forzato di Jeedom",
-		"pt_PT": "watchdog que permite cortar a alimentação durante alguns segundos para uma reinicialização forçada do Jeedom"
-	},
-	"licence": "AGPL",
-	"author": "ktn",
-	"require": "4.5.3",
-	"os": {
-		"min": 10,
-		"max": 13.99
-	},
-	"category": "monitoring",
-	"hasDependency": false,
-	"hasOwnDeamon": false,
-	"documentation": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
-	"changelog": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
-	"documentation_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
-	"changelog_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
-	"link": {
-		"forum": "",
-		"video": ""
-	},
-	"language": [
-		"de_DE",
-		"en_US",
-		"es_ES",
-		"fr_FR",
-		"it_IT",
-		"pt_PT"
-	],
-	"compatibility": [
-		"smart",
-		"luna",
-		"atlas",
-		"rpi",
-		"docker",
-		"diy",
-		"mobile"
-	]
+  "id": "jeewatchdog",
+  "name": "JeeWatchdog",
+  "pluginVersion": "0.1",
+  "description": {
+    "fr_FR": "watchdog permettant de couper l'alimentation durant quelques secondes pour un redémarrage hard de jeedom",
+    "en_US": "A watchdog that cuts power for a few seconds to perform a hard reboot of Jeedom",
+    "es_ES": "programa de vigilancia que permite cortar la alimentación durante unos segundos para realizar un reinicio forzado de Jeedom",
+    "de_DE": "Watchdog, der die Stromversorgung für einige Sekunden unterbricht, um einen Hard-Neustart von Jeedom durchzuführen",
+    "it_IT": "watchdog che consente di interrompere l'alimentazione per alcuni secondi per un riavvio forzato di Jeedom",
+    "pt_PT": "watchdog que permite cortar a alimentação durante alguns segundos para uma reinicialização forçada do Jeedom"
+  },
+  "licence": "AGPL",
+  "author": "ktn",
+  "require": "4.5.3",
+  "os": {
+    "min": 10,
+    "max": 13.99
+  },
+  "category": "monitoring",
+  "hasDependency": false,
+  "hasOwnDeamon": false,
+  "documentation": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
+  "changelog": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
+  "documentation_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/index.html",
+  "changelog_beta": "https://docsjeedom.ockolly.ch/plugins/jeewatchdog/#language#/changelog.html",
+  "link": {
+    "forum": "",
+    "video": ""
+  },
+  "language": ["de_DE", "en_US", "es_ES", "fr_FR", "it_IT", "pt_PT"],
+  "compatibility": ["smart", "luna", "atlas", "rpi", "docker", "diy", "mobile"]
 }
