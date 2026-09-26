@@ -10,6 +10,14 @@ let CONFIG = {
   offDuration: #offDuration#
 };
 
+// Fonction pour que le plugin puisse recuperer la Config actuelle
+// function getConfig() {
+//   let keys = Object.keys(CONFIG)
+//   for (let i=0; i<keys.length; i++){
+//     
+//   }
+// }
+
 // Etat interne du script (rendu accessible globalement)
 let counter = CONFIG.watchdogTimeout;
 let isWaiting = false;
@@ -53,7 +61,7 @@ function watch() {
 
 Timer.set(1000, true, function() {
   if (CONFIG.inputId >= 0){
-    // On gère d'abord l'etat de l'interrupteur "maintenance"
+    // On gere d'abord l'etat de l'interrupteur "maintenance"
     Shelly.call("Input.GetStatus", {id: CONFIG.inputId}, function(status) {
       if (status && status.state === true) {
         print("Jeedom est en maintenance, le watchdog est en pause");
