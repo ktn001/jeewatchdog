@@ -217,8 +217,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								<div class="col-sm-4">
 								</div>
 								<div class="col-sm-6">
-									<a class="btn btn-sm btn-success eqLogicAction pull-right" data-action="configureDevice">
-										<i class="fas fa-magic"></i> {{Configurer le switch}}
+									<a class="btn btn-sm btn-warning eqLogicAction pull-right" data-action="configureDevice">
+										<i class="fas fa-magic"></i> {{Forcer la Configuration du switch}}
 									</a>
 								</div>
 							</div>

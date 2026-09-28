@@ -105,7 +105,16 @@ class jeewatchdog extends eqLogic {
 	*** Mise à jour du cron et de l'appareil
 	***/
 	public function postSave() {
-		$this->createOrUpdateCron();
+		if ($this->getIsEnable()) {
+			$this->configureDevice();
+			$this->createOrUpdateCron();
+		} else {
+			$cron = $this->getCron(false);
+			if (is_object($cron)) {
+				$cron->remove();
+			}
+			$this->configureDevice();
+		}
 	}
 
 	/**
@@ -606,9 +615,16 @@ class jeewatchdog extends eqLogic {
 		}
 		$config = [];
 
-		if (! $this->deviceConfig('input:0','enable')){
-			log::add(__CLASS__,"info",__("Activation de l'input 0 (bouton maintenance)",__FILE__));
-			$config['enable'] = true;
+		if ($this->getIsEnable()) {
+			if (! $this->deviceConfig('input:0','enable')){
+				log::add(__CLASS__,"info",__("Activation de l'input 0 (bouton maintenance)",__FILE__));
+				$config['enable'] = true;
+			}
+		} else {
+			if ($this->deviceConfig('input:0','enable')){
+				log::add(__CLASS__,"info",__("Désactivation de l'input 0 (bouton maintenance)",__FILE__));
+				$config['enable'] = false;
+			}
 		}
 
 		$name = config::byKey('name') . "::" . __("maintenance",__FILE__);
@@ -624,10 +640,10 @@ class jeewatchdog extends eqLogic {
 		}
 
 		if (count($config) > 0) {
-			$params['id'] = 0;
 			$data = [
 				"method" => "Input.SetConfig",
 				"params" => [
+					'id' => 0,
 					'config' => $config
 				]
 			];
@@ -862,8 +878,14 @@ class jeewatchdog extends eqLogic {
 
 			// Check enable
 			//
-			if (!$actualHook['enable']){
-				$params['enable'] = true;
+			if ($this->getIsEnable()){
+				if (!$actualHook['enable']){
+					$params['enable'] = true;
+				}
+			} else {
+				if ($actualHook['enable']){
+					$params['enable'] = false;
+				}
 			}
 
 			// Check urls
@@ -906,12 +928,13 @@ class jeewatchdog extends eqLogic {
 		//
 		foreach (array_keys($hooks) as $state) {
 			if ($hooks[$state]['status'] == 'notFound') {
+				$enable = $this->getIsEnable() ? true : false;
 				$data = [
 					"method" => "Webhook.Create",
 					"params" => [
 						"event" => $hooks[$state]['event'],
 						"cid"	=> $hooks[$state]['cid'],
-						"enable"=> true,
+						"enable"=> $enable,
 						"name"  => $hooks[$state]['name'],
 						"urls"  => $hooks[$state]['urls'],
 					]
@@ -938,7 +961,9 @@ class jeewatchdog extends eqLogic {
 
 		$scriptId = $this->getScriptId();
 		$scriptInfos = [];
+		log::add(__CLASS__,"debug",sprintf(__("ScriptId récupépé du cache: %s",__FILE__),$scriptId));
 		if (is_numeric($scriptId)){
+			log::add(__CLASS__,"info",__("Récupération de la liste des scripts",__FILE__));
 			$data = ["method" => "Script.List"];
 			$answer = $this->sendToDevice($data);
 			foreach ($answer['result']['scripts'] as $actualScript) {
@@ -960,6 +985,7 @@ class jeewatchdog extends eqLogic {
 		} else {
 			// On récupère la liste des scripts running qui peuvent être pour cet eqLogic
 			//
+			log::add(__CLASS__,"info",__("Récupération de la liste des scripts",__FILE__));
 			$scripts = [];
 			$data = ["method" => "Script.List"];
 			$answer = $this->sendToDevice($data);
@@ -1038,7 +1064,6 @@ class jeewatchdog extends eqLogic {
 			$inputId = 0;
 		}
 
-		log::add(__CLASS__,"info",sprintf(__("Préparation du script pour le switch %s",__FILE__),$switchId));
 		$code = file_get_contents($scriptFile);
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
 
@@ -1089,9 +1114,17 @@ class jeewatchdog extends eqLogic {
 		if ($scriptInfos['meta']['name'] !== $name) {
 			$config['name'] = $name;
 		}
-		if (!$scriptInfos['meta']['enable']) {
-			$config['enable'] = true;
+
+		if ($this->getIsEnable()) {
+			if (!$scriptInfos['meta']['enable']) {
+				$config['enable'] = true;
+			}
+		} else {
+			if ($scriptInfos['meta']['enable']) {
+				$config['enable'] = false;
+			}
 		}
+
 		if (count($config) > 0){
 			$data = [
 				'method' => 'Script.SetConfig',
@@ -1103,17 +1136,31 @@ class jeewatchdog extends eqLogic {
 			$this->sendToDevice($data);
 		}
 
-		if (!$scriptInfos['meta']['running']) {
-			$data = [
-				'method' => 'Script.Start',
-				'params' => [
-					'id'     => $scriptId,
-				]
-			];
-			$this->sendToDevice($data);
+		if ($this->getIsEnable()) {
+			if (!$scriptInfos['meta']['running']) {
+				$data = [
+					'method' => 'Script.Start',
+					'params' => [
+						'id'     => $scriptId,
+					]
+				];
+				$this->sendToDevice($data);
+			}
+		} else {
+			if ($scriptInfos['meta']['running']) {
+				$data = [
+					'method' => 'Script.Stop',
+					'params' => [
+						'id'     => $scriptId,
+					]
+				];
+				$this->sendToDevice($data);
+			}
 		}
-		$this->setScriptId($scriptId);
 
+		log::add(__CLASS__,"debug",sprintf(__("Script id %s en cache.",__FILE__),$scriptId));
+		$this->setScriptId($scriptId);
+		
 
 	}
 
@@ -1159,11 +1206,15 @@ class jeewatchdog extends eqLogic {
 
 	public function _kickWatchdog() {
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
+		$id = $this->getScriptId();
+		if (!is_numeric($id)) {
+			$id = 2;
+		}
 		$data = [
 			"id" => 1,
 			"method" => "Script.Eval",
 			"params" => [
-				"id" => 1,
+				"id" => $id,
 				"code" => "setCounterRemote(" . $watchdogTimeout . ")"
 			]
 		];
@@ -1179,7 +1230,7 @@ class jeewatchdog extends eqLogic {
 	}
 
 	public function setScriptId($_scriptId) {
-		$this->setCache($_scriptId);
+		$this->setCache('scriptId',$_scriptId);
 		return $this;
 	}
 
