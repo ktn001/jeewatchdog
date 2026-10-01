@@ -1224,7 +1224,7 @@ class jeewatchdog extends eqLogic {
 			$script = [
 				'meta' => [
 					'id'     => $answer['result']['id'],
-					'name'   => $name,this->getScriptName(),
+					'name'   => $name,$this->getScriptName(),
 					'enable' => false,
 					'running'=> false,
 				],
