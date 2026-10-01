@@ -17,6 +17,12 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
+function jeewatchdog_goto_3() {
+	foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
+		$eqLogic->save();
+	}
+}
+
 function jeewatchdog_goto_2() {
 	foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
 		$cmd = $eqLogic->getCmd('action','ping');
@@ -35,7 +41,7 @@ function jeewatchdog_goto_1() {
 }
 
 function jeewatchdog_upgrade() {
-	$lastLevel = 2;
+	$lastLevel = 3;
 
 	$pluginLevel = config::byKey('pluginLevel', 'jeewatchdog', 0);
 	log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel . " => " . $lastLevel);
