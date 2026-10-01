@@ -10,14 +10,6 @@ let CONFIG = {
   offDuration: #offDuration#
 };
 
-// Fonction pour que le plugin puisse recuperer la Config actuelle
-// function getConfig() {
-//   let keys = Object.keys(CONFIG)
-//   for (let i=0; i<keys.length; i++){
-//     
-//   }
-// }
-
 // Etat interne du script (rendu accessible globalement)
 let counter = CONFIG.watchdogTimeout;
 let isWaiting = false;

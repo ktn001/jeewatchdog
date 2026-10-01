@@ -125,6 +125,7 @@ class jeewatchdog extends eqLogic {
 		if (is_object($cron)) {
 			$cron->remove();
 		}
+		$this->unconfigureDevice();
 	}
 
 	/**
@@ -213,6 +214,23 @@ class jeewatchdog extends eqLogic {
 		$cron->setTimeout(1);
 		$cron->setEnable($this->getIsEnable());
 		$cron->save();
+	}
+
+	public function _kickWatchdog() {
+		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
+		$id = $this->searchScript(true,true);
+		if (!is_numeric($id)) {
+			throw new Exception (__("Script Id introuvable",__FILE__));
+		}
+		$data = [
+			"id" => 1,
+			"method" => "Script.Eval",
+			"params" => [
+				"id" => $id,
+				"code" => "setCounterRemote(" . $watchdogTimeout . ")"
+			]
+		];
+		$this->sendToDevice($data);
 	}
 
 	private function postRequest ($data) {
@@ -451,11 +469,31 @@ class jeewatchdog extends eqLogic {
 			$data = [
 				"method" => "Sys.SetConfig",
 				"params" => [
-					'config' => $config
+					"config" => $config
 				]
 			];
-			$answer = $this->sendToDevice($data);
+			$this->sendToDevice($data);
 		}
+	}
+
+	private function unconfigureDeviceSystem(){
+		log::add(__CLASS__,"info",__("Déconfiguration du nom de l'appareil",__FILE__));
+		$data = [
+			"method" => "Sys.setConfig",
+			"params" => [
+				"config" => [
+					"device" => [
+						"name" => ""
+					]
+				],
+				"debug" => [
+					"websocket" => [
+						"enable" => false
+					]
+				]
+			]
+		];
+		$this->sendToDevice($data);
 	}
 
 	/**
@@ -647,8 +685,34 @@ class jeewatchdog extends eqLogic {
 					'config' => $config
 				]
 			];
-			$answer = $this->sendToDevice($data);
+			$this->sendToDevice($data);
 		}
+	}
+
+	/**
+	*** Configuration de l'input pour le bouton de maintenance
+	***/
+	private function unconfigureDeviceInput() {
+		log::add(__CLASS__,"info",__("Déconfiguration du bouton de maintenance",__FILE__));
+		$deviceModel = $this->getConfiguration('deviceModel');
+		$device = self::getModel($deviceModel);
+		if ($device['nbInput'] == 0) {
+			return;
+		}
+		if ($device['nbInput'] > 1) {
+			throw new Exception (__("Les appareils ayant plusieurs inputs ne sont pas supportés",__FILE__));
+		}
+		$data = [
+			"method" => "Input.SetConfig",
+			"params" => [
+				"id"     => 0,
+				"config" => [
+					"name" => "",
+					"enable" => false,
+				]
+			]
+		];
+		$this->sendToDevice($data);
 	}
 
 	/**
@@ -729,21 +793,37 @@ class jeewatchdog extends eqLogic {
 	}
 
 	/**
-	*** Configuration des webhooks pour signaler l'état du bouton "maintenance" à Jeedom
+	*** Configuration du/des switch(es)
 	***/
-	private function	configureDeviceWebhook(){
+	private function unconfigureDeviceSwitch() {
 		$deviceModel = $this->getConfiguration('deviceModel');
 		$device = self::getModel($deviceModel);
-		if ($device['nbInput'] == 0) {
-			return;
+		$switches = $this->getConfiguration('switches');
+		if ($device['nbSwitch'] == 1) {
+			$switches[0] = 1;
 		}
-		if ($device['nbInput'] > 1) {
-			throw new Exception (__("Les appareils ayant plusieurs inputs ne sont pas supportés",__FILE__));
+		foreach (range(0, $device['nbSwitch']-1) as $switchId) {
+			$switchKey = 'switch:' . $switchId;
+			$config = [];
+			if ($switches[$switchId] == 1) {
+				$data = [
+					"method" => "Switch.SetConfig",
+					"params" => [
+						'id' => $switchId,
+						'config' => [
+							'name' => ''
+						],
+					],
+				];
+				$this->sendToDevice($data);
+			}
 		}
-		$inputId = 0;
+	}
 
-		// Les adresses IP de Jeedom
-		//
+	/**
+	*** Retourne la liste des adresses IP du serveur Jeedom
+	**/
+	private function getIPs() {
 		$interfaces = network::getInterfacesInfo();
 		$ips = [];
 		foreach ($interfaces as $interface) {
@@ -760,6 +840,26 @@ class jeewatchdog extends eqLogic {
 				$ips[] = $addrInfo['local'];
 			}
 		}
+		return $ips;
+	}
+
+	/**
+	*** Configuration des webhooks pour signaler l'état du bouton "maintenance" à Jeedom
+	***/
+	private function configureDeviceWebhook(){
+		$deviceModel = $this->getConfiguration('deviceModel');
+		$device = self::getModel($deviceModel);
+		if ($device['nbInput'] == 0) {
+			return;
+		}
+		if ($device['nbInput'] > 1) {
+			throw new Exception (__("Les appareils ayant plusieurs inputs ne sont pas supportés",__FILE__));
+		}
+		$inputId = 0;
+
+		// Les adresses IP de Jeedom
+		//
+		$ips = $this->getIPs();
 		if (count($ips) == 0) {
 			throw new Exception(__("Adresse IP de jeedom introuvable!",__FILE__));
 		}
@@ -939,16 +1039,74 @@ class jeewatchdog extends eqLogic {
 						"urls"  => $hooks[$state]['urls'],
 					]
 				];
-				$answer = $this->sendToDevice($data);
+				$this->sendToDevice($data);
 			}
 		}
 	}
 
 	/**
-	*** Configuration du script
-	***/
-	private function configureDeviceScript(){
-		// Code javascript pour récupérer la config du script
+	*** Déconfiguration de Webhook
+	**/
+	private function unconfigureDeviceWebhook(){
+		log::add(__CLASS__,"info",__("Récupération de la liste de webhooks",__FILE__));
+		$data = [ "method" => "Webhook.List" ];
+		$answer = $this->sendToDevice($data);
+		$hooks= $answer['result']['hooks'];
+
+		$ips = $this->getIPs();
+		foreach ($hooks as $hook){
+			$ok = true;
+			foreach ($hook['urls'] as $url) {
+				$elems = parse_url($url);
+				if (!in_array($elems['host'],$ips)) {
+					$ok = false;
+					continue;
+				}
+				if ($elems['path'] !== '/core/api/jeeApi.php') {
+					$ok = false;
+					continue;
+				}
+				$args = [];
+				parse_str($elems['query'],$args);
+				if ($args['plugin'] != 'jeewatchdog') {
+					$ok = false;
+					continue;
+				}
+				$cmd = cmd::byId($args['id']);
+				if (!is_object($cmd)) {
+					$ok = false;
+					continue;
+				}
+				if ($cmd->getEqLogic_id() != $this->getId()){
+					$ok = false;
+					continue;
+				}
+			}
+			if ($ok){
+				log::add(__CLASS__,"info",sprintf(__("Suppression de l'action %s",__FILE__),$hook['id']));
+				$data = [
+					'method' => 'Webhook.Delete',
+					'params' => [
+						'id' => $hook['id']
+					]
+				];
+				$this->sendToDevice($data);
+			}
+		}
+	}
+
+	/**
+	*** Retoourne le nom du script
+	**/
+	private function getScriptName() {
+		return config::byKey('name') . "::" . $this->getId() . "::" . "script";
+	}
+
+	/**
+	*** Recherche du script installé dans le Shelly
+	**/
+	private function searchScript($idOnly = false, $runningOnly = false) {
+		log::add(__CLASS__,"info",__("Recherche du script",__FILE__));
 		$getConfig = <<<GETCONFIG
 			let conf = "{}"
 			if (typeof CONFIG !== 'undefined') {
@@ -957,89 +1115,123 @@ class jeewatchdog extends eqLogic {
 			conf
 		GETCONFIG;
 
-		$name = config::byKey('name') . "::" . $this->getId() . "::" . "script";
+		$scripts = [];
 
-		$scriptId = $this->getScriptId();
-		$scriptInfos = [];
-		log::add(__CLASS__,"debug",sprintf(__("ScriptId récupépé du cache: %s",__FILE__),$scriptId));
-		if (is_numeric($scriptId)){
-			log::add(__CLASS__,"info",__("Récupération de la liste des scripts",__FILE__));
-			$data = ["method" => "Script.List"];
-			$answer = $this->sendToDevice($data);
-			foreach ($answer['result']['scripts'] as $actualScript) {
-				if ($actualScript['id'] == $scriptId){
-					$scriptInfos['meta'] = $actualScript;
-					if ($actualScript['running']){
-						$data = [
-							"method" => "Script.Eval",
-							"params" => [
-								"id" => $actualScript['id'],
-								"code" => $getConfig,
-							]
-						];
-						$scriptInfos['config'] = json_decode($answer['result']['result'],true);
-					}
-				}
-				break;
-			}
-		} else {
-			// On récupère la liste des scripts running qui peuvent être pour cet eqLogic
-			//
-			log::add(__CLASS__,"info",__("Récupération de la liste des scripts",__FILE__));
-			$scripts = [];
-			$data = ["method" => "Script.List"];
-			$answer = $this->sendToDevice($data);
-			foreach ($answer['result']['scripts'] as $actualScript) {
-				if (!$actualScript['running']){
-					continue;
-				}
-				$data = [
-					"method" => "Script.Eval",
-					"params" => [
-						"id" => $actualScript['id'],
-						"code" => $getConfig,
-					]
-				];
-				$answer = $this->sendToDevice($data);
-				$scriptConfig = json_decode($answer['result']['result'],true);
-				if (!isset($scriptConfig['relayId']) or !isset($scriptConfig['inputId']) or !isset($scriptConfig['watchdogTimeout'])){
-					continue;
-				}
-				if (isset($scriptConfig['eqLogicId']) and $scriptConfig['eqLogicId'] != $this->getId()) {
-					continue;
-				}
-				if (isset($scriptConfig['jeedomKey']) and ($scriptConfig['jeedomKey'] != config::byKey('jeedom::installKey'))){
-					continue;
-				}
-				$scripts[$actualScript['id']] = [
-					'meta' => $actualScript,
-					'config' => $scriptConfig,
-				];
-			}
-			if (count($scripts) == 0) {
-				$data = [
-					"method" => "Script.Create",
-					"params" => [
-						"name" => $name,
-					]
-				];
-				$answer = $this->sendToDevice($data);
-				$scriptId = $answer['result']['id'];
-				$scriptInfos = [
-					'meta' => [
-						'id'     => $scriptId,
-						'name'   => $name,
-						'enable' => false,
-						'running'=> false,
-					],
-				];
-			} else {
-				$scriptId = array_keys($scripts)[0];
-				$scriptInfos = $scripts[$scriptId];
-			}
+		$data = ["method" => "Script.List"];
+		$answer = $this->sendToDevice($data);
+		foreach ($answer['result']['scripts'] as $script) {
+			$scripts[$script['id']] = ['meta' => $script];
 		}
 
-		/* Creation du script */
+		$scriptId = null;
+		$idFromCache = $this->getScriptId();
+		if (is_numeric($idFromCache)) {
+			log::add(__CLASS__,"debug","  " . sprintf(__("Script id %s trouvé dans le cache",__FILE__),$idFromCache));
+			if (isset($scripts[$idFromCache])){
+				if ($scripts[$idFromCache]['meta']['running']) {
+					$data = [
+						"method" => "Script.Eval",
+						"params" => [
+							"id" => $idFromCache,
+							"code" => $getConfig,
+						]
+					];
+					$answer = $this->sendToDevice($data);
+					$config = json_decode($answer['result']['result'],true);
+					$scripts[$idFromCache]['config'] = $config;
+					$ok = true;
+					if (!isset($config['watchdogTimeout'])) {
+						log::add(__CLASS__,"warning",sprintf(__("La config <watchdogTimeout> du script %s iest introuvable!",__FILE__),$idFromCache));
+						$ok = false;
+					}
+					if (!isset($config['offDuration'])) {
+						log::add(__CLASS__,"warning",sprintf(__("La config <offDuration> du script %s iest introuvable!",__FILE__),$idFromCache));
+						$ok = false;
+					}
+					if (isset($config['jeedomKey']) and $config['jeedomKey'] !== config::byKey('jeedom::installKey')){
+						log::add(__CLASS__,"warning",sprintf(__("La config <jeedomKey> du script %s ne correspond pas à la clé d'installation de Jeedom!",__FILE__),$idFromCache));
+						$ok = false;
+					}
+					if (isset($config['eqLogicId']) and $config['eqLogicId'] != $this->getId()) {
+						log::add(__CLASS__,"warning",sprintf(__("La config <eqLogicIc> du script %s ne correspond pas à l'id de l'équipement!",__FILE__),$idFromCache));
+						$ok = false;
+					}
+					if ($ok) {
+						$scriptId = $idFromCache;
+					}
+				} else {
+					$scriptId = $idFromCache;
+				}
+			} else {
+				log::add(__CLASS__,"warning","  " . sprintf(__("Script id %s est introuvable",__FILE__),$idFromCache));
+			}
+		}
+		if ($scriptId === null){
+			foreach ($scripts as $script) {
+				if (!isset($script['config']) and $script['meta']['running']){
+					$data = [
+						"method" => "Script.Eval",
+						"params" => [
+							"id" => $script['meta']['id'],
+							"code" => $getConfig,
+						]
+					];
+					$answer = $this->sendToDevice($data);
+					$config = json_decode($answer['result']['result'],true);
+					$script['config'] = $config;
+				}
+				if (isset($script['config'])){
+					if (!isset($script['config']['watchdogTimeout'])){
+						unset ($scripts[$script['meta']['id']]);
+					} elseif (isset($script['config']['jeedomKey']) and $script['config']['jeedomKey'] !== config::byKey('jeedom::installKey')) {
+						unset ($scripts[$script['meta']['id']]);
+					} elseif (isset($script['config']['eqLogicId']) and $script['config']['eqLogicId'] != $this->getId()) {
+						unset ($scripts[$script['meta']['id']]);
+					}
+				} else {
+					if ($script['meta']['name'] !== $this->getScriptName()) {
+						unset ($scripts[$script['meta']['id']]);
+					}
+				}
+			}
+			$scriptId = array_key_first($scripts);
+		}
+		if ($scriptId === null){
+			return null;
+		}
+		if ($runningOnly and !$scripts[$scriptId]['meta']['running']){
+			return null;
+		}
+		if ($idOnly){
+			return $scriptId;
+		}
+		return $scripts[$scriptId];
+	}
+
+	/**
+	*** Configuration du script
+	***/
+	private function configureDeviceScript(){
+		$script = $this->searchScript();
+		if ($script === null){
+			$data = [
+				"method" => "Script.Create",
+				"params" => [
+					"name" => $this->getScriptName(),
+				]
+			];
+			$answer = $this->sendToDevice($data);
+			$script = [
+				'meta' => [
+					'id'     => $answer['result']['id'],
+					'name'   => $name,this->getScriptName(),
+					'enable' => false,
+					'running'=> false,
+				],
+			];
+		}
+
+		/* Creation du code */
 		$model = jeewatchdog::getModel($this->getConfiguration('deviceModel'));
 		$scriptFile = __DIR__ . '/../config/' . $model['script'];
 
@@ -1079,22 +1271,24 @@ class jeewatchdog extends eqLogic {
 		];
 		$code = str_replace(array_keys($replace), $replace, $code);
 
-		$data = [
-			'method' => 'Script.GetCode',
-			'params' => [
-				'id' => $scriptId,
-			]
-		];
-		$answer = $this->sendToDevice($data);
-		$actualCode = $answer['result']['data'];
-		file_put_contents("/tmp/code.shelly",$actualCode);
-		file_put_contents("/tmp/code.plugin",$code);
+		if (isset($script['meta']['running'])){
+			$data = [
+				'method' => 'Script.GetCode',
+				'params' => [
+					'id' => $script['meta']['id'],
+				]
+			];
+			$answer = $this->sendToDevice($data);
+			$actualCode = $answer['result']['data'];
+		} else {
+			$actualCode = "";
+		}
 		if ($actualCode !== $code) {
-			if ($scriptInfos['meta']['running']) {
+			if ($script['meta']['running']) {
 				$data = [
 					'method' => 'Script.Stop',
 					"params" => [
-						"id" => $scriptId,
+						"id" => $script['meta']['id'],
 					]
 				];
 				$this->sendToDevice($data);
@@ -1103,7 +1297,7 @@ class jeewatchdog extends eqLogic {
 			$data = [
 				"method" => "Script.putCode",
 				"params" => [
-					"id" => $scriptId,
+					"id" => $script['meta']['id'],
 					"code" => $code
 				]
 			];
@@ -1111,16 +1305,16 @@ class jeewatchdog extends eqLogic {
 		}
 
 		$config = [];
-		if ($scriptInfos['meta']['name'] !== $name) {
-			$config['name'] = $name;
+		if ($script['meta']['name'] !== $this->getScriptName()) {
+			$config['name'] = $this->getScriptName();
 		}
 
 		if ($this->getIsEnable()) {
-			if (!$scriptInfos['meta']['enable']) {
+			if (!$script['meta']['enable']) {
 				$config['enable'] = true;
 			}
 		} else {
-			if ($scriptInfos['meta']['enable']) {
+			if ($script['meta']['enable']) {
 				$config['enable'] = false;
 			}
 		}
@@ -1129,7 +1323,7 @@ class jeewatchdog extends eqLogic {
 			$data = [
 				'method' => 'Script.SetConfig',
 				'params' => [
-					'id'     => $scriptId,
+					'id'     => $script['meta']['id'],
 					'config' => $config
 				]
 			];
@@ -1137,31 +1331,57 @@ class jeewatchdog extends eqLogic {
 		}
 
 		if ($this->getIsEnable()) {
-			if (!$scriptInfos['meta']['running']) {
+			if (!$script['meta']['running']) {
 				$data = [
 					'method' => 'Script.Start',
 					'params' => [
-						'id'     => $scriptId,
+						'id'     => $script['meta']['id'],
 					]
 				];
 				$this->sendToDevice($data);
 			}
 		} else {
-			if ($scriptInfos['meta']['running']) {
+			if ($script['meta']['running']) {
 				$data = [
 					'method' => 'Script.Stop',
 					'params' => [
-						'id'     => $scriptId,
+						'id'     => $script['meta']['id'],
 					]
 				];
 				$this->sendToDevice($data);
 			}
 		}
 
-		log::add(__CLASS__,"debug",sprintf(__("Script id %s en cache.",__FILE__),$scriptId));
-		$this->setScriptId($scriptId);
-		
+		log::add(__CLASS__,"debug",sprintf(__("Script id %s en cache.",__FILE__),$script['meta']['id']));
+		$this->setScriptId($script['meta']['id']);
 
+
+	}
+
+	/**
+	*** Déconfiguration du script
+	***/
+	private function unconfigureDeviceScript(){
+		$script = $this->searchScript();
+		if (is_array($script)) {
+			if ($script['meta']['running']) {
+				$data = [
+					'method' => 'Script.Stop',
+					'params' => [
+						'id'     => $script['meta']['id'],
+					]
+				];
+				$this->sendToDevice($data);
+			}
+			$data = [
+				'method' => 'Script.Delete',
+				'params' => [
+					'id'     => $script['meta']['id'],
+				]
+			];
+			$this->sendToDevice($data);
+		}
+		$this->setScriptId(null);
 	}
 
 	/**
@@ -1181,7 +1401,6 @@ class jeewatchdog extends eqLogic {
 		}
 		$deviceName = $jeedomName == '' ? $this->getName() : $jeedomName . "::" . $this->getName();
 
-		$restartRequired = false;
 		$this->_restartRequired = false;
 
 		$this->configureDeviceSystem();
@@ -1202,23 +1421,41 @@ class jeewatchdog extends eqLogic {
 			$this->sendToDevice($data);
 			unset ($this->_restartRequired);
 		}
+		if ($this->getIsEnable()){
+			$this->_kickWatchdog();
+		}
 	}
 
-	public function _kickWatchdog() {
-		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
-		$id = $this->getScriptId();
-		if (!is_numeric($id)) {
-			$id = 2;
+	/**
+	*** Déconfiguration de l'appareil
+	**/
+	public function unconfigureDevice() {
+		$deviceModel = $this->getConfiguration('deviceModel');
+		$device = self::getModel($deviceModel);
+		if ($device === null) {
+			throw new Exception (sprintf(__("Le modèle %s est inconnu.",__FILE__),$deviceModel));
 		}
-		$data = [
-			"id" => 1,
-			"method" => "Script.Eval",
-			"params" => [
-				"id" => $id,
-				"code" => "setCounterRemote(" . $watchdogTimeout . ")"
-			]
-		];
-		$this->sendToDevice($data);
+
+		$deviceIP = $this->getConfiguration('deviceIP');
+		if ($deviceIP == '') {
+			throw new Exception (__("Adresse IP ou nom DNS du device inconnu!",__FILE__));
+		}
+		$jeedomName = config::byKey('name');
+		$deviceName = $jeedomName == '' ? $this->getName() : $jeedomName . "::" . $this->getName();
+
+		$this->_restartRequired = false;
+
+		$this->unconfigureDeviceScript();
+		$this->unconfigureDeviceWebhook();
+		$this->unconfigureDeviceSwitch();
+		$this->unconfigureDeviceInput();
+		$this->unconfigureDeviceSystem();
+
+		if ($this->_restartRequired) {
+			$data = [ "method" => "Shelly.reboot" ];
+			$this->sendToDevice($data);
+			unset ($this->_restartRequired);
+		}
 	}
 
 	/*     * ***************************************************************** */
