@@ -113,7 +113,9 @@ class jeewatchdog extends eqLogic {
 			if (is_object($cron)) {
 				$cron->remove();
 			}
-			$this->configureDevice();
+			if ($this->getConfiguration('deviceModel') != '') {
+				$this->configureDevice();
+			}
 		}
 	}
 
