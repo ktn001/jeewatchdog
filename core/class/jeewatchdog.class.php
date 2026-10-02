@@ -220,7 +220,7 @@ class jeewatchdog extends eqLogic {
 
 	public function _kickWatchdog() {
 		$watchdogTimeout = $this->getConfiguration('watchdogTimeout') * 60;
-		foreach (range(15) as $i) {
+		foreach (range(0,15) as $i) {
 			$id = $this->searchScript(true,true);
 			if (is_numeric($id)) {
 				break;
