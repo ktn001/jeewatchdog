@@ -1,7 +1,7 @@
 <?php
-# vi: tabstop=4 autoindent
+//vi: tabstop=4 shiftwidth=4 expandtab autoindent
 if (!isConnect('admin')) {
-	throw new Exception('{{401 - Accès non autorisé}}');
+    throw new Exception('{{401 - Accès non autorisé}}');
 }
 // Déclaration des variables obligatoires
 $plugin = plugin::byId('jeewatchdog');
@@ -10,259 +10,268 @@ $eqLogics = eqLogic::byType($plugin->getId());
 ?>
 
 <div class="row row-overflow">
-	<!-- Page d'accueil du plugin -->
-	<div class="col-xs-12 eqLogicThumbnailDisplay">
-		<legend><i class="fas fa-cog"></i> {{Gestion}}</legend>
-		<!-- Boutons de gestion du plugin -->
-		<div class="eqLogicThumbnailContainer">
-			<div class="cursor eqLogicAction logoPrimary" data-action="add">
-				<i class="fas fa-plus-circle"></i>
-				<br>
-				<span>{{Ajouter}}</span>
-			</div>
-			<div class="cursor eqLogicAction logoSecondary" data-action="gotoPluginConf">
-				<i class="fas fa-wrench"></i>
-				<br>
-				<span>{{Configuration}}</span>
-			</div>
-		</div>
-		<legend><i class="fas fa-table"></i> {{Mes jeewatchdogs}}</legend>
-		<?php
-		if (count($eqLogics) == 0) {
-			echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Template trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
-		} else {
-			// Champ de recherche
-			echo '<div class="input-group" style="margin:5px;">';
-			echo '<input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic">';
-			echo '<div class="input-group-btn">';
-			echo '<a id="bt_resetSearch" class="btn" style="width:30px"><i class="fas fa-times"></i></a>';
-			echo '<a class="btn roundedRight hidden" id="bt_pluginDisplayAsTable" data-coreSupport="1" data-state="0"><i class="fas fa-grip-lines"></i></a>';
-			echo '</div>';
-			echo '</div>';
-			// Liste des équipements du plugin
-			echo '<div class="eqLogicThumbnailContainer">';
-			foreach ($eqLogics as $eqLogic) {
-				$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-				echo '<div class="eqLogicDisplayCard cursor ' . $opacity . '" data-eqLogic_id="' . $eqLogic->getId() . '">';
-				echo '<img src="' . $eqLogic->getImage() . '"/>';
-				echo '<br>';
-				echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-				echo '<span class="hiddenAsCard displayTableRight hidden">';
-				echo ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Equipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Equipement non visible}}"></i>';
-				echo '</span>';
-				echo '</div>';
-			}
-			echo '</div>';
-		}
-		?>
-	</div> <!-- /.eqLogicThumbnailDisplay -->
+    <!-- Page d'accueil du plugin -->
+    <div class="col-xs-12 eqLogicThumbnailDisplay">
+        <legend><i class="fas fa-cog"></i> {{Gestion}}</legend>
+        <!-- Boutons de gestion du plugin -->
+        <div class="eqLogicThumbnailContainer">
+            <div class="cursor eqLogicAction logoPrimary" data-action="add">
+                <i class="fas fa-plus-circle"></i>
+                <br>
+                <span>{{Ajouter}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" data-action="gotoPluginConf">
+                <i class="fas fa-wrench"></i>
+                <br>
+                <span>{{Configuration}}</span>
+            </div>
+        </div>
+        <legend><i class="fas fa-table"></i> {{Mes jeewatchdogs}}</legend>
+        <?php
+        if (count($eqLogics) == 0) {
+            echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Template trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
+        } else {
+            // Champ de recherche
+            echo '<div class="input-group" style="margin:5px;">';
+            echo '<input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic">';
+            echo '<div class="input-group-btn">';
+            echo '<a id="bt_resetSearch" class="btn" style="width:30px"><i class="fas fa-times"></i></a>';
+            echo '<a class="btn roundedRight hidden" id="bt_pluginDisplayAsTable" data-coreSupport="1" data-state="0"><i class="fas fa-grip-lines"></i></a>';
+            echo '</div>';
+            echo '</div>';
+            // Liste des équipements du plugin
+            echo '<div class="eqLogicThumbnailContainer">';
+            foreach ($eqLogics as $eqLogic) {
+                $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                echo '<div class="eqLogicDisplayCard cursor ' . $opacity . '" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                echo '<img src="' . $eqLogic->getImage() . '"/>';
+                echo '<br>';
+                echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+                echo '<span class="hiddenAsCard displayTableRight hidden">';
+                echo ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Equipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Equipement non visible}}"></i>';
+                echo '</span>';
+                echo '</div>';
+            }
+            echo '</div>';
+        }
+        ?>
+    </div> <!-- /.eqLogicThumbnailDisplay -->
 
-	<!-- Page de présentation de l'équipement -->
-	<div class="col-xs-12 eqLogic" style="display: none;">
-		<!-- barre de gestion de l'équipement -->
-		<div class="input-group pull-right" style="display:inline-flex;">
-			<span class="input-group-btn">
-				<!-- Les balises <a></a> sont volontairement fermées à la ligne suivante pour éviter les espaces entre les boutons. Ne pas modifier -->
-				<a class="btn btn-sm btn-default eqLogicAction roundedLeft" data-action="configure"><i class="fas fa-cogs"></i><span class="hidden-xs"> {{Configuration avancée}}</span>
-				</a><a class="btn btn-sm btn-default eqLogicAction" data-action="copy"><i class="fas fa-copy"></i><span class="hidden-xs"> {{Dupliquer}}</span>
-				</a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}
-				</a><a class="btn btn-sm btn-danger eqLogicAction roundedRight" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}
-				</a>
-			</span>
-		</div>
-		<!-- Onglets -->
-		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
-			<li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
-			<li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
-		</ul>
-		<div class="tab-content">
-			<!-- Onglet de configuration de l'équipement -->
-			<div role="tabpanel" class="tab-pane active" id="eqlogictab">
-				<!-- Partie gauche de l'onglet "Equipements" -->
-				<!-- Paramètres généraux et spécifiques de l'équipement -->
-				<form class="form-horizontal">
-					<fieldset>
-						<div class="col-lg-6">
-							<legend><i class="fas fa-wrench"></i> {{Paramètres généraux}}</legend>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Nom de l'équipement}}</label>
-								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display:none;">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}">
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Objet parent}}</label>
-								<div class="col-sm-6">
-									<select id="sel_object" class="eqLogicAttr form-control" data-l1key="object_id">
-										<option value="">{{Aucun}}</option>
-										<?php
-										$options = '';
-										foreach ((jeeObject::buildTree(null, false)) as $object) {
-											$options .= '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
-										}
-										echo $options;
-										?>
-									</select>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Catégorie}}</label>
-								<div class="col-sm-6">
-									<?php
-									foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
-										echo '<label class="checkbox-inline">';
-										echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" >' . $value['name'];
-										echo '</label>';
-									}
-									?>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Options}}</label>
-								<div class="col-sm-6">
-									<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked>{{Activer}}</label>
-									<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
-								</div>
-							</div>
+    <!-- Page de présentation de l'équipement -->
+    <div class="col-xs-12 eqLogic" style="display: none;">
+        <!-- barre de gestion de l'équipement -->
+        <div class="input-group pull-right" style="display:inline-flex;">
+            <span class="input-group-btn">
+                <!-- Les balises <a></a> sont volontairement fermées à la ligne suivante pour éviter les espaces entre les boutons. Ne pas modifier -->
+                <a class="btn btn-sm btn-default eqLogicAction roundedLeft" data-action="configure"><i class="fas fa-cogs"></i><span class="hidden-xs"> {{Configuration avancée}}</span>
+                </a><a class="btn btn-sm btn-default eqLogicAction" data-action="copy"><i class="fas fa-copy"></i><span class="hidden-xs"> {{Dupliquer}}</span>
+                </a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}
+                </a><a class="btn btn-sm btn-danger eqLogicAction roundedRight" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}
+                </a>
+            </span>
+        </div>
+        <!-- Onglets -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
+            <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
+            <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Onglet de configuration de l'équipement -->
+            <div role="tabpanel" class="tab-pane active" id="eqlogictab">
+                <!-- Partie gauche de l'onglet "Equipements" -->
+                <!-- Paramètres généraux et spécifiques de l'équipement -->
+                <form class="form-horizontal">
+                    <fieldset>
+                        <div class="col-lg-6">
+                            <legend><i class="fas fa-wrench"></i> {{Paramètres généraux}}</legend>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Nom de l'équipement}}</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display:none;">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Objet parent}}</label>
+                                <div class="col-sm-6">
+                                    <select id="sel_object" class="eqLogicAttr form-control" data-l1key="object_id">
+                                        <option value="">{{Aucun}}</option>
+                                        <?php
+                                        $options = '';
+                                        foreach ((jeeObject::buildTree(null, false)) as $object) {
+                                            $options .= '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
+                                        }
+                                        echo $options;
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Catégorie}}</label>
+                                <div class="col-sm-6">
+                                    <?php
+                                    foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
+                                        echo '<label class="checkbox-inline">';
+                                        echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" >' . $value['name'];
+                                        echo '</label>';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Options}}</label>
+                                <div class="col-sm-6">
+                                    <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isEnable" checked>{{Activer}}</label>
+                                    <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
+                                </div>
+                            </div>
 
-							<legend><i class="fas fa-dog"></i> {{Paramètres du watchdog}}</legend>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Modèle d'équipement}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Le switch qui doit être pingué régulièrement}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceModel">
-										<?php
-										$models = jeewatchdog::getModel();
-										foreach ($models as $key => $model) {
-											$label = $model['label'];
-											$nbSwitch = $model['nbSwitch'];
-											echo "<option value=$key data-nbswitch=$nbSwitch>$label</option>";
-										}
-										?>
-									</select>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Addresse IP du switch}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<div class="input-group">
-										<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceIP">
-										<span class="input-group-btn">
-											<a class="btn btn-default form-control bt_openShelly roundRight"><i class="fas fa-external-link-alt"></i></a>
-										</span>
-									</div>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Mot de passe}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe du switch}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<div class="input-group">
-										<input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
-										<span class="input-group-btn">
-											<a class="btn btn-default form-control bt_showPass roundRight"><i class="fas fa-eye"></i></a>
-										</span>
-									</div>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Temps max d'inactivité}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Temps limite (en minutes) avant que le watchdog coupe l'alimentation du Jeedom}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<input type="number" class="eqLogicAttr form-control tooltips" title="Minutes"  data-l1key="configuration" data-l2key="watchdogTimeout">
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Temps de coupure}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Durée (en secondes) de la coupure d'alimentation}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<input type="number" class="eqLogicAttr form-control tooltips" title="Secondes"  data-l1key="configuration" data-l2key="offDuration">
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Déclencheur de Kicks}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Déclencheur de l'envoi du ping}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="kickmode">
-										<option value="cron" selected >cron</option>
-										<option value="scenario" selected >scenario</option>
-									</select>
-								</div>
-							</div>
-							<div id="divPlugs" class="form-group switches">
-								<label class="col-sm-4 control-label">{{Prises à commander}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Prise à couper pour le redémarrage}}"></i></sup>
-								</label>
-								<div class="col-sm-6">
-									<?php
-									for ($i=0; $i<10; $i++) {
-										echo "<label class='checkbox-inline'>";
-										echo "<input type='checkbox' class='eqLogicAttr form-control' data-l1key='configuration' data-l2key='switches' data-l3key='$i'>";
-										echo $i+1;
-										echo "</label>";
-									}
-									?>
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-sm-4">
-								</div>
-								<div class="col-sm-6">
-									<a class="btn btn-sm btn-warning eqLogicAction pull-right" data-action="configureDevice">
-										<i class="fas fa-magic"></i> {{Forcer la Configuration du switch}}
-									</a>
-								</div>
-							</div>
-						</div>
+                            <legend><i class="fas fa-dog"></i> {{Paramètres du watchdog}}</legend>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Identifiant}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Identifiant aléatoire pour les composants du Shelly}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="logicalId" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Modèle d'équipement}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Le switch qui doit être pingué régulièrement}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceModel">
+                                        <?php
+                                        $models = jeewatchdog::getModel();
+                                        foreach ($models as $key => $model) {
+                                            $label = $model['label'];
+                                            $nbSwitch = $model['nbSwitch'];
+                                            $virtual = $model['virtual'];
+                                            echo "<option value=$key data-nbswitch=$nbSwitch data-virtual=$virtual>$label</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Addresse IP du switch}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP ou nom DNS du switch}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="deviceIP">
+                                        <span class="input-group-btn">
+                                            <a class="btn btn-default form-control bt_openShelly roundRight"><i class="fas fa-external-link-alt"></i></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Mot de passe}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe du switch}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
+                                        <span class="input-group-btn">
+                                            <a class="btn btn-default form-control bt_showPass roundRight"><i class="fas fa-eye"></i></a>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Temps max d'inactivité}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Temps limite (en minutes) avant que le watchdog coupe l'alimentation du Jeedom}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="eqLogicAttr form-control tooltips" title="Minutes"  data-l1key="configuration" data-l2key="watchdogTimeout">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Temps de coupure}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Durée (en secondes) de la coupure d'alimentation}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="eqLogicAttr form-control tooltips" title="Secondes"  data-l1key="configuration" data-l2key="offDuration">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Déclencheur de Kicks}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Déclencheur de l'envoi du ping}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="kickmode">
+                                        <option value="cron" selected >cron</option>
+                                        <option value="scenario" selected >scenario</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="divPlugs" class="form-group switches">
+                                <label class="col-sm-4 control-label">{{Prises à commander}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Prise à couper pour le redémarrage}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <?php
+                                    for ($i=0; $i<10; $i++) {
+                                        echo "<label class='checkbox-inline'>";
+                                        echo "<input type='checkbox' class='eqLogicAttr form-control' data-l1key='configuration' data-l2key='switches' data-l3key='$i'>";
+                                        echo $i+1;
+                                        echo "</label>";
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-4">
+                                </div>
+                                <div class="col-sm-6">
+                                    <a class="btn btn-sm btn-warning eqLogicAction pull-right" data-action="configureDevice">
+                                        <i class="fas fa-magic"></i> {{Forcer la Configuration du switch}}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
 
-						<!-- Partie droite de l'onglet "Équipement" -->
-						<!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
-						<div class="col-lg-6">
-							<legend><i class="fas fa-info"></i> {{Informations}}</legend>
-							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Description}}</label>
-								<div class="col-sm-6">
-									<textarea class="form-control eqLogicAttr autogrow" data-l1key="comment"></textarea>
-								</div>
-							</div>
-						</div>
-					</fieldset>
-				</form>
-			</div><!-- /.tabpanel #eqlogictab-->
+                        <!-- Partie droite de l'onglet "Équipement" -->
+                        <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
+                        <div class="col-lg-6">
+                            <legend><i class="fas fa-info"></i> {{Informations}}</legend>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Description}}</label>
+                                <div class="col-sm-6">
+                                    <textarea class="form-control eqLogicAttr autogrow" data-l1key="comment"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div><!-- /.tabpanel #eqlogictab-->
 
-			<!-- Onglet des commandes de l'équipement -->
-			<div role="tabpanel" class="tab-pane" id="commandtab">
-				<br><br>
-				<div class="table-responsive">
-					<table id="table_cmd" class="table table-bordered table-condensed">
-						<thead>
-							<tr>
-								<th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
-								<th style="min-width:200px;width:350px;">{{Nom}}</th>
-								<th style="width:130px;">{{Type}}</th>
-								<th style="width:130px;">LogicalId</th>
-								<th style="min-width:260px;">{{Options}}</th>
-								<th>{{Etat}}</th>
-								<th style="min-width:80px;width:200px;">{{Actions}}</th>
-							</tr>
-						</thead>
-						<tbody>
-						</tbody>
-					</table>
-				</div>
-			</div><!-- /.tabpanel #commandtab-->
+            <!-- Onglet des commandes de l'équipement -->
+            <div role="tabpanel" class="tab-pane" id="commandtab">
+                <br><br>
+                <div class="table-responsive">
+                    <table id="table_cmd" class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
+                                <th style="min-width:200px;width:350px;">{{Nom}}</th>
+                                <th style="width:130px;">{{Type}}</th>
+                                <th style="width:130px;">LogicalId</th>
+                                <th style="min-width:260px;">{{Options}}</th>
+                                <th>{{Etat}}</th>
+                                <th style="min-width:80px;width:200px;">{{Actions}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /.tabpanel #commandtab-->
 
-		</div><!-- /.tab-content -->
-	</div><!-- /.eqLogic -->
+        </div><!-- /.tab-content -->
+    </div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->

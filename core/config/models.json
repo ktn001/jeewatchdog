@@ -5,6 +5,7 @@
 		"nbInput": 1,
 		"modbus": 0,
 		"knx": 0,
+		"virtual": 0,
 		"script": "shelly.js"
 	},
 	"Shelly1Gen3": {
@@ -13,6 +14,7 @@
 		"nbInput": 1,
 		"modbus": 0,
 		"knx" : 1,
+		"virtual": 1,
 		"script": "shelly.js"
 	},
 	"Shelly1MiniGen3": {
@@ -21,6 +23,7 @@
 		"nbInput": 1,
 		"modbus": 0,
 		"knx" : 1,
+		"virtual": 1,
 		"script": "shelly.js"
 	},
 	"Shelly1Gen4": {
@@ -29,6 +32,7 @@
 		"nbInput": 1,
 		"modbus": 1,
 		"knx" : 1,
+		"virtual": 1,
 		"script": "shelly.js"
 	},
 	"Shelly1MiniGen4": {
@@ -37,6 +41,7 @@
 		"nbInput": 1,
 		"modbus": 1,
 		"knx" : 1,
+		"virtual": 1,
 		"script": "shelly.js"
 	},
 	"ShellyPowerStrip4Gen4": {
@@ -45,6 +50,7 @@
 		"nbInput": 0,
 		"modbus": 0,
 		"knx" : 0,
+		"virtual": 1,
 		"script": "shelly.js"
 	}
 }

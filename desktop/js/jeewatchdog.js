@@ -86,6 +86,16 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 					}
 				})
 			}
+
+			let rm_btn = document.getElementById("div_pageContainer").querySelectorAll("tr[data-cmd_logicalid^=vmaintenance] [data-action=remove]")
+			if (rm_btn) {
+				let virtual = selector.selectedOptions[0].dataset.virtual
+				if (virtual == 1) {
+					rm_btn.unseen()
+				} else {
+					rm_btn.seen()
+				}
+			}
 		}
 		
 	}
@@ -105,7 +115,7 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 		if (!isset(_cmd.configuration)) {
 			_cmd.configuration = {}
 		}
-		var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">'
+		var tr = '<tr>'
 		tr += '<td class="hidden-xs">'
 		tr += '<span class="cmdAttr" data-l1key="id"></span>'
 		tr += '</td>'
@@ -117,20 +127,16 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 		tr += '</div>'
 		tr += '</td>'
 		tr += '<td>'
-		tr += '<input class="cmdAttr form-control input-sm" data-l1key="type" disabled=1</input>'
-		tr += '<input class="cmdAttr form-control input-sm" data-l1key="subType" disabled=1</input>'
+		tr += '<input class="cmdAttr form-control input-sm" data-l1key="type" readonly></input>'
+		tr += '<input class="cmdAttr form-control input-sm" data-l1key="subType" readonly></input>'
 		tr += '</td>'
 		tr += '<td>'
-		tr += '<input class="cmdAttr form-control input-sm" data-l1key="logicalId" disabled=1</input>'
+		tr += '<input class="cmdAttr form-control input-sm" data-l1key="logicalId" readonly></input>'
 		tr += '</td>'
 		tr += '<td>'
 		tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</label> '
 		tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isHistorized" checked/>{{Historiser}}</label> '
-		tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="display" data-l2key="invertBinary"/>{{Inverser}}</label> '
 		tr += '<div style="margin-top:7px;">'
-		tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
-		tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
-		tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="unite" placeholder="Unité" title="{{Unité}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
 		tr += '</div>'
 		tr += '</td>'
 		tr += '<td>';
@@ -141,19 +147,33 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 			tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fas fa-cogs"></i></a> '
 			tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fas fa-rss"></i> {{Tester}}</a>'
 		}
+		if (_cmd.logicalId.startsWith('vmaintenance')) {
+			tr += '<i class="fas fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>'
+		}
 		tr += '</td>';
 		tr += '</tr>'
-		$('#table_cmd tbody').append(tr)
-		var tr = $('#table_cmd tbody tr').last()
+
+		let newRow = document.createElement('tr')
+		newRow.innerHTML = tr
+		newRow.addClass('cmd')
+		newRow.setAttribute('data-cmd_id', init(_cmd.id))
+		newRow.setAttribute('data-cmd_logicalid', init(_cmd.logicalId))
+		document.getElementById('table_cmd').querySelector('tbody').appendChild(newRow)
+
 		jeedom.eqLogic.buildSelectCmd({
-			id: $('.eqLogicAttr[data-l1key=id]').value(),
+			id: document.querySelector('.eqLogicAttr[data-l1key="id"]').jeeValue(),
 			filter: { type: 'info' },
 			error: function (error) {
-				$('#div_alert').showAlert({ message: error.message, level: 'danger' })
+				jeedomUtils.showAlert({ message: error.message, level: 'danger' })
 			},
 			success: function (result) {
-				tr.setValues(_cmd, '.cmdAttr')
-				jeedom.cmd.changeType(tr, init(_cmd.subType))
+				newRow.setJeeValues(_cmd, '.cmdAttr')
+				jeedom.cmd.changeType(newRow, init(_cmd.subType))
+				let selector = document.
+					querySelector('.eqLogicAttr[data-l1key=configuration][data-l2key=deviceModel]')
+				if (selector) {
+					selector.dispatchEvent(new Event('change', {bubbles: true}))
+				}
 			}
 		})
 	}
@@ -162,14 +182,4 @@ if (typeof jeewatchdogFrontEnd === "undefined") {
 jeewatchdogFrontEnd.init()
 addCmdToTable = jeewatchdogFrontEnd.addCmdToTable
 
-
-/* Permet la réorganisation des commandes dans l'équipement */
-$("#table_cmd").sortable({
-	axis: "y",
-	cursor: "move",
-	items: ".cmd",
-	placeholder: "ui-state-highlight",
-	tolerance: "intersect",
-	forcePlaceholderSize: true
-})
 

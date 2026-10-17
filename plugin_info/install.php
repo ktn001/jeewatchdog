@@ -1,4 +1,5 @@
 <?php
+//vi: tabstop=4 shiftwidth=4 expandtab autoindent
 /* This file is part of Jeedom.
 *
 * Jeedom is free software: you can redistribute it and/or modify
@@ -17,59 +18,72 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
+function jeewatchdog_goto_4() {
+    foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
+        $cmd = $eqLogic->getCmd('info','maintenance');
+        if (is_object($cmd)) {
+            if ($cmd->getName() == __('maintenance',__FILE__)) {
+                $cmd->setName(__('maintenance (physique)',__FILE__));
+                $cmd-> save();
+            }
+        }
+        $eqLogic->save();
+    }
+}
+
 function jeewatchdog_goto_3() {
-	foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
-		$eqLogic->save();
-	}
+    foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
+        $eqLogic->save();
+    }
 }
 
 function jeewatchdog_goto_2() {
-	foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
-		$cmd = $eqLogic->getCmd('action','ping');
-		if (is_object($cmd)) {
-			$cmd->setLogicalId('kick');
-			$cmd->save();
-		}
-	}
+    foreach (jeewatchdog::byType('jeewatchdog') as $eqLogic) {
+        $cmd = $eqLogic->getCmd('action','ping');
+        if (is_object($cmd)) {
+            $cmd->setLogicalId('kick');
+            $cmd->save();
+        }
+    }
 }
 
 function jeewatchdog_goto_1() {
-	$packagesjson = __DIR__ . '/packages.json';
-	if (file_exists($packagesjson)){
-		unlink($packagesjson);
-	}
+    $packagesjson = __DIR__ . '/packages.json';
+    if (file_exists($packagesjson)){
+        unlink($packagesjson);
+    }
 }
 
 function jeewatchdog_upgrade() {
-	$lastLevel = 3;
+    $lastLevel = 4;
 
-	$pluginLevel = config::byKey('pluginLevel', 'jeewatchdog', 0);
-	log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel . " => " . $lastLevel);
-	for ($level = 0; $level <= $lastLevel; $level++) {
-		if ($pluginLevel < $level) {
-			$function = 'jeewatchdog_goto_' . $level;
-			if (function_exists($function)) {
-				log::add("jeewatchdog","debug","execution de " . $function . "()");
-				$function();
-			}
-			config::save('pluginLevel',$level,'jeewatchdog');
-			$pluginLevel = $level;
-			log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel);
-		}
-	}
+    $pluginLevel = config::byKey('pluginLevel', 'jeewatchdog', 0);
+    log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel . " => " . $lastLevel);
+    for ($level = 0; $level <= $lastLevel; $level++) {
+        if ($pluginLevel < $level) {
+            $function = 'jeewatchdog_goto_' . $level;
+            if (function_exists($function)) {
+                log::add("jeewatchdog","debug","execution de " . $function . "()");
+                $function();
+            }
+            config::save('pluginLevel',$level,'jeewatchdog');
+            $pluginLevel = $level;
+            log::add("jeewatchdog","info","pluginLevel: " . $pluginLevel);
+        }
+    }
 }
 
 
 // Fonction exécutée automatiquement après l'installation du plugin
 function jeewatchdog_install() {
-	log::add("jeewatchdog","info","Lancement de 'jeewatchdog_install()'");
-	jeewatchdog_upgrade();
+    log::add("jeewatchdog","info","Lancement de 'jeewatchdog_install()'");
+    jeewatchdog_upgrade();
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function jeewatchdog_update() {
-	log::add("jeewatchdog","info","Lancement de 'jeewatchdog_update()'");
-	jeewatchdog_upgrade();
+    log::add("jeewatchdog","info","Lancement de 'jeewatchdog_update()'");
+    jeewatchdog_upgrade();
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin
