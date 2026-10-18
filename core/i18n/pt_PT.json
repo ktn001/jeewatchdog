@@ -14,13 +14,17 @@
         "Commande %s introuvable ou pas de type %s": "Comando %s não encontrado ou não existe o tipo %s",
         "Commande '%s' introuvable!": "Comando «%s» não encontrado!",
         "Configuration de l'état du switch %s au boot": "Configuração do estado do comutador %s no arranque",
+        "Configuration des webhooks": "Configuração dos webhooks",
+        "Configuration du bouton virtuel de maintenance": "Configuração do botão virtual de manutenção",
         "Configuration du nom de l'appareil": "Configuração do nome do dispositivo",
         "Configuration du nom de l'input (bouton maintenance)": "Configuração do nome da entrada (botão de manutenção)",
         "Configuration du nom du switch %s": "Configuração do nome do switch %s",
+        "Configuration du script": "Configuração do script",
         "Création du cron pour %s (id: %s)": "Criação do cron para %s (id: %s)",
         "Déconfiguration du bouton de maintenance": "Desativação do botão de manutenção",
         "Déconfiguration du nom de l'appareil": "Desconfiguração do nome do dispositivo",
         "Déconfiguration du nom du switch %s": "Desconfiguração do nome do switch %s",
+        "Déconfiguration du script": "Desativação do script",
         "Désactivation de BLE": "Desativação do BLE",
         "Désactivation de debug mqtt": "Desativação do modo de depuração MQTT",
         "Désactivation de debug websocket": "Desativação da depuração do WebSocket",
@@ -38,10 +42,7 @@
         "Envoi de la requete %s": "Envio do pedido %s",
         "Erreur lors de l'envoi de la requête": "Erro ao enviar o pedido",
         "Infos d'authentification non fournies": "Informações de autenticação não fornecidas",
-        "La config <eqLogicIc> du script %s ne correspond pas à l'id de l'équipement!": "A configuração <eqLogicIc> do script %s não corresponde ao ID do equipamento!",
-        "La config <jeedomKey> du script %s ne correspond pas à la clé d'installation de Jeedom!": "A configuração <jeedomKey> do script %s não corresponde à chave de instalação do Jeedom!",
-        "La config <offDuration> du script %s iest introuvable!": "Não foi possível encontrar a configuração <offDuration> do script %s!",
-        "La config <watchdogTimeout> du script %s iest introuvable!": "Não foi encontrada a configuração <watchdogTimeout> do script %s!",
+        "Le bouton virtuel de maintenance est introuvable": "Não consigo encontrar o botão virtual de manutenção",
         "Le modèle %s est inconnu.": "O modelo %s é desconhecido.",
         "Le nombre d'urls ne correspond pas": "O número de URLs não corresponde",
         "Le timeout du watchdog n'est pas défini!": "O tempo de espera do watchdog não está definido!",
@@ -50,24 +51,21 @@
         "Récupération de la configuration actuelle de l'appareil": "Recuperação da configuração atual do dispositivo",
         "Récupération de la liste de webhooks": "Recuperação da lista de webhooks",
         "Script Id introuvable": "Não foi possível encontrar o ID do script",
-        "Script id %s en cache.": "Script com ID %s em cache.",
-        "Script id %s est introuvable": "Não foi possível encontrar o script com o ID %s",
-        "Script id %s trouvé dans le cache": "Script com o ID %s encontrado na cache",
         "Suppression de l'action %s": "Eliminação da ação %s",
         "Suppression du webHook %s (dupliqué)": "Eliminação do webhook %s (duplicado)",
         "Suppression du webHook %s (event %s inconnu)": "Eliminação do webhook %s (evento %s desconhecido)",
-        "maintenance": "manutenção"
+        "maintenance": "manutenção",
+        "maintenance (physique)": "manutenção (física)",
+        "maintenance (virtuel)": "manutenção (virtual)",
+        "maintenance off": "manutenção desativada",
+        "maintenance on": "manutenção em curso"
     },
     "plugins\/jeewatchdog\/desktop\/js\/jeewatchdog.js": {
         "Afficher": "Mostrar",
         "Choisir une icône": "Escolha um ícone",
         "Historiser": "Histórico",
-        "Inverser": "Inverter",
-        "Max": "Máx.",
-        "Min": "Mínimo",
         "Nom de la commande": "Nome do comando",
         "Tester": "Testar",
-        "Unité": "Unidade",
         "Vous devez d'abord sauvegarder vos modifications": "Primeiro, tem de guardar as suas alterações"
     },
     "plugins\/jeewatchdog\/desktop\/modal\/modal.jeewatchdog.php": {
@@ -97,6 +95,8 @@
         "Etat": "Estado",
         "Forcer la Configuration du switch": "Forçar a configuração do switch",
         "Gestion": "Gestão",
+        "Identifiant": "EU IRIA",
+        "Identifiant aléatoire pour les composants du Shelly": "Identificador aleatório para os componentes Shelly",
         "Informations": "Informação",
         "Le switch qui doit être pingué régulièrement": "O switch que deve ser verificado regularmente",
         "Mes jeewatchdogs": "Os meus Jeewatchdogs",
@@ -119,5 +119,9 @@
         "Temps max d'inactivité": "Tempo máximo de inatividade",
         "Type": "Tipo",
         "Visible": "Visível"
+    },
+    "plugins\/jeewatchdog\/plugin_info\/install.php": {
+        "maintenance": "manutenção",
+        "maintenance (physique)": "manutenção (física)"
     }
 }
