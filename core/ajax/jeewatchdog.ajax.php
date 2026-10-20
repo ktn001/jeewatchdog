@@ -35,7 +35,7 @@ try {
         if (!is_object($eqLogic)) {
             throw new Exception(__("EqLogic introuvable. Vérifiez l'ID",__FILE__));
         }
-        $eqLogic->unconfigureDevice();
+        $eqLogic->configureDevice();
         ajax::success();
     }
 
