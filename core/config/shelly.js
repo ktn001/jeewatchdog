@@ -31,17 +31,19 @@ if (CONFIG.virtualKey != ''){
 }
 
 // Desactivation de la maintenance virtuelle sur desactivation maintenance physique
-Shelly.addEventHandler(function(event) {
-    // Verifie si l'evenement provient d'une entree (interrupteur)
-    if (event.component === ("input:" + CONFIG.inputId)) {
-        if (event.info.event === "toggle" && event.info.state === false) {
-            let vmaintenance = Virtual.getHandle(CONFIG.virtualKey);
-            if (vmaintenance !== null) {
-                vmaintenance.setValue(false)
+if (CONFIG.virtualKey != ''){
+    Shelly.addEventHandler(function(event) {
+        // Verifie si l'evenement provient d'une entree (interrupteur)
+        if (event.component === ("input:" + CONFIG.inputId)) {
+            if (event.info.event === "toggle" && event.info.state === false) {
+                let vmaintenance = Virtual.getHandle(CONFIG.virtualKey);
+                if (vmaintenance !== null) {
+                    vmaintenance.setValue(false)
+                }
             }
         }
-    }
-})
+    })
+}
 
 // Serveur HTTP pour les pings de Jeedom
 HTTPServer.registerEndpoint("jeePing",function(request,response) {

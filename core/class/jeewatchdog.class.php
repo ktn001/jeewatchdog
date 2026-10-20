@@ -886,26 +886,28 @@ class jeewatchdog extends eqLogic {
             throw new Exception(__("Clé API du plugin introuvable!"));
         }
 
-        // L'id de la commande
-        //
-        $cmd = $this->getCmd('info', 'vmaintenance');
-        if (!is_object($cmd)) {
-            throw new Exception(sprintf(__("Commande '%s' introuvable!", __FILE__), 'vmaintenance'));
-        }
-        $cmdId = $cmd->getId();
-
-        $path  = '/core/api/jeeApi.php';
-        $path .= '?plugin=' . __CLASS__;
-        $path .= '&type=event';
-        $path .= '&apikey=' . $apiKey;
-        $path .= '&id=' . $cmdId;
-        $path .= '&value=';
-
         $urlsOn = [];
         $urlsOff = [];
-        foreach ($ips as $ip) {
-            $urlsOn[] = '"http://' . $ip . $path . '1"';
-            $urlsOff[] = '"http://' . $ip . $path . '0"';
+        if ($model['virtual'] == 0) {
+            // L'id de la commande
+            //
+            $cmd = $this->getCmd('info', 'vmaintenance');
+            if (!is_object($cmd)) {
+                throw new Exception(sprintf(__("Commande '%s' introuvable!", __FILE__), 'vmaintenance'));
+            }
+            $cmdId = $cmd->getId();
+
+            $path  = '/core/api/jeeApi.php';
+            $path .= '?plugin=' . __CLASS__;
+            $path .= '&type=event';
+            $path .= '&apikey=' . $apiKey;
+            $path .= '&id=' . $cmdId;
+            $path .= '&value=';
+
+            foreach ($ips as $ip) {
+                $urlsOn[] = '"http://' . $ip . $path . '1"';
+                $urlsOff[] = '"http://' . $ip . $path . '0"';
+            }
         }
 
         $code = file_get_contents($scriptFile);
