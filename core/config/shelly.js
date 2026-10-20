@@ -70,9 +70,11 @@ function jeePong(response,inputStatus) {
   if (typeof inputStatus !== 'undefined'){
     status.maintenance = inputStatus.state ? '1' : '0'
   }
-  boolean = Virtual.getHandle(CONFIG.virtualKey)
-  if (boolean) {
-    status.vmaintenance = boolean.getValue() ? '1' : '0'
+  if (CONFIG.virtualKey != ''){
+    let boolean = Virtual.getHandle(CONFIG.virtualKey)
+    if (boolean) {
+      status.vmaintenance = boolean.getValue() ? '1' : '0'
+    }
   }
   response.code = 200
   response.headers = [["Content-Type", "application/json"]]
