@@ -888,7 +888,7 @@ class jeewatchdog extends eqLogic {
 
         $urlsOn = [];
         $urlsOff = [];
-        if ($model['virtual'] == 0) {
+        if ($model['virtual'] == 1) {
             // L'id de la commande
             //
             $cmd = $this->getCmd('info', 'vmaintenance');
