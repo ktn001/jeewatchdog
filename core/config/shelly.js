@@ -15,13 +15,11 @@ let CONFIG = {
 };
 
 // Declaration et initialisation de variables globales
-//
 let counter = CONFIG.watchdogTimeout;
 let isOff = false;
 print("Script demarre. Compteur initialise a :", counter);
 
 // webhook pour le virtuel (on informe Jeedom lors des changements d'etat)
-//
 if (CONFIG.virtualKey != ''){
   virtualMaintenance = Virtual.getHandle(CONFIG.virtualKey)
   virtualMaintenance.on("change",function(event){
@@ -32,10 +30,9 @@ if (CONFIG.virtualKey != ''){
   })
 }
 
-// Désactivation de la maintenance virtuelle sur désactivation maintenance physique
-//
+// Desactivation de la maintenance virtuelle sur desactivation maintenance physique
 Shelly.addEventHandler(function(event) {
-    // Vérifie si l'événement provient d'une entrée (interrupteur)
+    // Verifie si l'evenement provient d'une entree (interrupteur)
     if (event.component === ("input:" + CONFIG.inputId)) {
         if (event.info.event === "toggle" && event.info.state === false) {
             let vmaintenance = Virtual.getHandle(CONFIG.virtualKey);
@@ -82,7 +79,6 @@ function jeePong(response,inputStatus) {
 }
 
 // Fonction que Jeedom va pouvoir appeler a distance
-//
 function setCounterRemote(newValue) {
   counter = newValue;
   print("Compteur reinitialise a distance a :", counter);
@@ -90,7 +86,6 @@ function setCounterRemote(newValue) {
 
 
 // Commande des relais
-//
 function setRelayState(state) {
   for (let i = 0; i < CONFIG.relayId.length; i++){
     Shelly.call("Switch.Set", { id: CONFIG.relayId[i], on: state });
@@ -98,7 +93,6 @@ function setRelayState(state) {
 }
 
 // Fonction de surveillance
-//
 let watch = function(inputStatus) {
   let maintenance = false
   if (typeof inputStatus !== 'undefined'){
@@ -146,7 +140,6 @@ let watch = function(inputStatus) {
 }
 
 // Boucle principale
-//
 Timer.set(1000, true, function() {
   if (CONFIG.inputId >= 0){
     Shelly.call("Input.GetStatus", {id: CONFIG.inputId}, watch)
